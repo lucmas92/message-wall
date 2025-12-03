@@ -6,7 +6,7 @@ import type { IMessageService, Message } from './MessageService'
 const STORAGE_KEY = 'pending_messages'
 
 // Tempo di visualizzazione desiderato in millisecondi (es. 60 secondi)
-const DISPLAY_DURATION = 5000
+const DISPLAY_DURATION = 10000
 
 /**
  * Implementazione del servizio che salva i messaggi nel LocalStorage

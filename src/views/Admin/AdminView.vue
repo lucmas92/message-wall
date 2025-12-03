@@ -1,244 +1,161 @@
 <template>
-  <div class="admin-portal">
-    <h1>Pannello di Moderazione Messaggi</h1>
-    <button @click="handleLogout" class="btn-logout">Esci</button>
+  <div class="min-h-screen bg-gray-100 p-4 sm:p-6">
+    <div class="max-w-4xl mx-auto">
+      <div class="flex justify-between items-center pb-4 mb-6 border-b border-gray-300">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Pannello di Moderazione</h1>
+        <button
+          @click="handleLogout"
+          class="btn-logout bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-4 rounded transition"
+        >
+          Esci
+        </button>
+      </div>
 
-    <div v-if="isLoading" class="loading">Caricamento messaggi... ⏳</div>
-    <div v-else-if="errorMessage" class="error-message">❌ Errore: {{ errorMessage }}</div>
-    <div v-else>
-      <h2>Da Moderare ({{ pendingMessages.length }})</h2>
-      <p v-if="pendingMessages.length === 0" class="no-messages">
-        Nessun nuovo messaggio in attesa. Rilassati! 😎
-      </p>
+      <h2 class="text-xl font-semibold text-gray-700 mb-4 border-l-4 border-yellow-500 pl-2">
+        Da Moderare ({{ pendingMessages.length }})
+        <span v-if="isLoading" class="text-sm text-gray-500 ml-2">(Aggiornamento...)</span>
+      </h2>
 
-      <ul class="message-list pending">
-        <li v-for="message in pendingMessages" :key="message.id" :class="message.status">
-          <div class="message-text">ID: {{ message.id.slice(-4) }} - {{ message.text }}</div>
-          <div class="message-actions">
+      <div
+        v-if="pendingMessages.length === 0"
+        class="p-4 bg-white rounded-lg shadow-sm text-center text-gray-500"
+      >
+        Nessun nuovo messaggio in attesa.
+      </div>
+
+      <ul class="space-y-4">
+        <li
+          v-for="message in pendingMessages"
+          :key="message.id"
+          class="bg-white p-4 rounded-lg shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center border-l-8 border-yellow-400"
+        >
+          <div class="message-content mb-3 sm:mb-0 sm:w-3/5">
+            <p class="text-gray-900 font-medium text-base">{{ message.text }}</p>
+            <small class="text-gray-400 text-xs">ID: {{ message.id.slice(-4) }}</small>
+          </div>
+
+          <div class="flex space-x-2 w-full sm:w-auto">
             <button
               @click="updateStatus(message.id, 'approved')"
               :disabled="message.status === '...'"
-              class="btn-approve"
+              class="flex-1 min-w-32 py-2 rounded font-semibold text-white transition disabled:opacity-50 bg-green-500 hover:bg-green-600"
             >
-              <span v-if="message.status === '...'">Aggiornando...</span>
+              <span v-if="message.status === '...'">...</span>
               <span v-else>✅ Approva</span>
             </button>
             <button
               @click="updateStatus(message.id, 'rejected')"
               :disabled="message.status === '...'"
-              class="btn-reject"
+              class="flex-1 min-w-32 py-2 rounded font-semibold text-white transition disabled:opacity-50 bg-red-500 hover:bg-red-600"
             >
-              <span v-if="message.status === '...'">Aggiornando...</span>
+              <span v-if="message.status === '...'">...</span>
               <span v-else>❌ Rifiuta</span>
             </button>
           </div>
         </li>
       </ul>
 
-      <h2 class="moderated-title">Già Moderati ({{ moderatedMessages.length }})</h2>
-      <ul class="message-list moderated">
-        <li v-for="message in moderatedMessages" :key="message.id" :class="message.status">
-          <div class="message-text">{{ message.text }}</div>
-          <div class="message-status">
-            Stato:
-            <span :class="message.status">{{
-              message.status === 'approved' ? 'Approvato' : 'Rifiutato'
-            }}</span>
-          </div>
-        </li>
-      </ul>
+      <h2 class="text-xl font-semibold text-gray-700 mt-8 mb-4 border-l-4 border-blue-500 pl-2">
+        Già Moderati ({{ moderatedMessages.length }})
+      </h2>
+      <ul class="space-y-2 text-sm"></ul>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { authService, messageService } from '@/services'
-import type { Message } from '@/services/MessageService'
+import { ref, onMounted, onUnmounted, computed } from 'vue' // Importiamo onUnmounted
+import { messageService, authService } from '@/services'
 import { useRouter } from 'vue-router'
+import type { Message } from '@/services/MessageService'
 
-const messages = ref<Message[]>([])
-const isLoading = ref(true)
-const errorMessage = ref<string | null>(null)
+const router = useRouter()
 
-// Proprietà calcolate per il filtraggio nell'interfaccia
-const pendingMessages = computed(() => messages.value.filter((m) => m.status === 'pending'))
-const moderatedMessages = computed(() => messages.value.filter((m) => m.status !== 'pending'))
+// --- STATO REATTIVO ---
+const allMessages = ref<Message[]>([])
+const updateStatusMap = ref(new Map<string, '...' | 'pending' | 'approved' | 'rejected'>())
+const isLoading = ref(true) // Stato di caricamento iniziale/polling
+
+// --- LOGICA POLLING ---
+const POLLING_RATE = 10000 // Aggiorna ogni 10 secondi
+let pollingInterval: number | undefined
+
+// --- COMPUTED (INVARIANTI) ---
+const pendingMessages = computed(() => {
+  return allMessages.value.filter((m) => m.status === 'pending')
+})
+
+const moderatedMessages = computed(() => {
+  return allMessages.value.filter((m) => m.status !== 'pending')
+})
 
 /**
- * Carica tutti i messaggi dal servizio dati.
+ * Funzione principale per caricare tutti i messaggi e categorizzarli.
  */
-async function loadMessages() {
+async function fetchAndCategorizeMessages() {
   isLoading.value = true
-  errorMessage.value = null
   try {
-    messages.value = await messageService.fetchMessages()
-  } catch (err) {
-    errorMessage.value = 'Impossibile caricare i messaggi.'
-    console.error(err)
+    const messages = await messageService.fetchMessages()
+    allMessages.value = messages.sort((a, b) => (a.id > b.id ? -1 : 1)) // Ordine decrescente per ID (più recenti prima)
+  } catch (error) {
+    console.error('Errore nel recupero dei messaggi:', error)
   } finally {
     isLoading.value = false
   }
 }
 
 /**
- * Aggiorna lo stato di un messaggio e aggiorna l'array locale.
+ * Avvia il polling.
  */
-async function updateStatus(id: string, status: Message['status']) {
-  const messageToUpdate = messages.value.find((m) => m.id === id)
-  if (!messageToUpdate) return
+function startPolling() {
+  // Esegue il fetch immediatamente al caricamento
+  fetchAndCategorizeMessages()
+  // Poi lo ripete ogni 10 secondi
+  pollingInterval = setInterval(fetchAndCategorizeMessages, POLLING_RATE) as unknown as number
+}
 
-  // 1. Stato temporaneo per disabilitare i pulsanti
-  const originalStatus = messageToUpdate.status
-  messageToUpdate.status = '...'
-
-  try {
-    // 2. Chiamata al servizio
-    await messageService.updateMessageStatus(id, status)
-
-    // 3. Successo: aggiornamento definitivo nell'array locale
-    messageToUpdate.status = status
-  } catch (err) {
-    // 4. Errore: ripristino dello stato e messaggio d'errore
-    errorMessage.value = `Errore nell'aggiornare il messaggio ${id}.`
-    messageToUpdate.status = originalStatus
-    console.error(err)
-    setTimeout(() => {
-      errorMessage.value = null
-    }, 5000)
+/**
+ * Ferma il polling.
+ */
+function stopPolling() {
+  if (pollingInterval) {
+    clearInterval(pollingInterval)
   }
 }
 
-const router = useRouter() // Ottieni l'istanza del router
+/**
+ * Aggiorna lo stato del messaggio e ricarica i dati.
+ */
+async function updateStatus(id: string, newStatus: Message['status']) {
+  const originalStatus = allMessages.value.find((m) => m.id === id)?.status
+
+  // Setta lo stato per mostrare il loading sul pulsante
+  updateStatusMap.value.set(id, '...')
+
+  try {
+    await messageService.updateMessageStatus(id, newStatus)
+
+    // Ricarica tutti i messaggi per ottenere lo stato aggiornato
+    await fetchAndCategorizeMessages()
+  } catch (error) {
+    console.error(`Errore nell'aggiornamento dello stato del messaggio ${id}:`, error)
+  } finally {
+    // Rimuove lo stato di loading
+    updateStatusMap.value.delete(id)
+  }
+}
 
 /**
  * Gestisce l'uscita dell'utente.
  */
 function handleLogout() {
-  authService.logout() // Chiama il servizio per pulire la sessione
-  router.push({ name: 'login' }) // Reindirizza l'utente alla pagina di login
+  stopPolling() // Interrompi il polling prima di uscire
+  authService.logout()
+  router.push({ name: 'login' })
 }
 
-// Carica i messaggi all'avvio del componente
-onMounted(loadMessages)
+// --- CICLO DI VITA DEL COMPONENTE ---
+onMounted(startPolling)
+
+onUnmounted(stopPolling)
 </script>
-
-<style scoped>
-.admin-portal {
-  max-width: 900px;
-  margin: 50px auto;
-  padding: 20px;
-  font-family: sans-serif;
-}
-/* ... (Stili base di prima) ... */
-h1,
-h2 {
-  text-align: center;
-  color: #2c3e50;
-  margin-bottom: 20px;
-}
-
-.no-messages {
-  text-align: center;
-  color: #9e9e9e;
-  font-style: italic;
-}
-
-.moderated-title {
-  margin-top: 40px;
-  border-top: 1px solid #eee;
-  padding-top: 20px;
-}
-
-.message-list {
-  list-style: none;
-  padding: 0;
-}
-
-.message-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  background-color: #f9f9f9;
-}
-
-.message-list.pending li {
-  border-left: 5px solid #ffc107; /* Giallo per pending */
-}
-
-.message-list.pending li.approved,
-.message-list.pending li.rejected {
-  /* Nasconde i messaggi in attesa che sono stati approvati/rifiutati in tempo reale */
-  display: none;
-}
-
-.message-text {
-  flex-grow: 1;
-  font-size: 16px;
-  margin-right: 20px;
-}
-
-.message-actions button {
-  padding: 8px 15px;
-  margin-left: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.2s;
-}
-
-.btn-approve {
-  background-color: #28a745;
-  color: white;
-}
-
-.btn-approve:hover:not(:disabled) {
-  background-color: #218838;
-}
-
-.btn-reject {
-  background-color: #dc3545;
-  color: white;
-}
-
-.btn-reject:hover:not(:disabled) {
-  background-color: #c82333;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: wait;
-}
-
-/* Stili per messaggi già moderati */
-.message-list.moderated li.approved {
-  background-color: #e2f0d9;
-  border-left: 5px solid #28a745;
-}
-
-.message-list.moderated li.rejected {
-  background-color: #f8d7da;
-  border-left: 5px solid #dc3545;
-}
-
-.message-status .approved {
-  color: #28a745;
-  font-weight: bold;
-}
-.message-status .rejected {
-  color: #dc3545;
-  font-weight: bold;
-}
-
-.loading,
-.error-message {
-  text-align: center;
-  margin-top: 40px;
-  font-size: 1.2em;
-}
-</style>

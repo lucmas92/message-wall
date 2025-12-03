@@ -1,31 +1,30 @@
 <template>
-  <div class="screen-view">
-    <header class="screen-header">
-      <h1 class="logo-text">✨ Messaggi Live ✨</h1>
-      <p class="tagline">La tua voce sul grande schermo.</p>
+  <div class="min-h-screen bg-gray-900 text-white flex flex-col items-center p-4 sm:p-8">
+
+    <header class="w-full text-center pb-6 mb-8 border-b-2 border-gray-700">
+      <h1 class="text-4xl sm:text-6xl font-extrabold uppercase tracking-wide text-green-400">
+        ✨ MESSAGGI LIVE ✨
+      </h1>
+      <p class="text-lg text-gray-400 mt-2">La tua voce sul grande schermo.</p>
     </header>
 
-    <div v-if="isLoading && approvedMessages.length === 0" class="status-overlay">
-      <div class="loader-ring"></div>
-      <p class="status-text">In attesa di messaggi approvati...</p>
-    </div>
-
-    <div v-else-if="approvedMessages.length > 0" class="message-grid-container">
-      <transition-group name="message-flow" tag="div" class="message-grid">
+    <div v-if="approvedMessages.length > 0" class="w-full max-w-7xl flex-grow">
+      <transition-group name="message-flow" tag="div"
+                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
           v-for="message in approvedMessages"
           :key="message.id"
-          :class="['message-card', getCardClass(message.id)]"
+          :class="['message-card p-6 rounded-xl shadow-2xl transition duration-500', getCardClass(message.id)]"
         >
-          <p class="message-text">{{ message.text }}</p>
-          <span class="message-id">ID: {{ message.id.slice(-4) }}</span>
+          <p class="text-xl sm:text-2xl font-bold leading-snug">{{ message.text }}</p>
+          <span class="mt-4 block text-xs opacity-70">ID: {{ message.id.slice(-4) }}</span>
         </div>
       </transition-group>
     </div>
 
-    <div v-else-if="!isLoading" class="status-overlay">
-      <p class="status-text waiting">Attualmente non ci sono messaggi in coda.</p>
-      <p class="status-subtext">Scansiona il QR Code per inviare il tuo!</p>
+    <div v-else-if="!isLoading" class="flex flex-col items-center justify-center h-full absolute inset-0 text-center">
+      <p class="text-3xl font-light text-gray-400">Attualmente non ci sono messaggi in coda.</p>
+      <p class="text-lg text-gray-500 mt-2">Scansiona il QR Code per inviare il tuo!</p>
     </div>
   </div>
 </template>
@@ -92,184 +91,25 @@ onUnmounted(stopPolling)
 </script>
 
 <style scoped>
-/* -------------------- VARIABILI E FONDAMENTALI -------------------- */
-/* Ho rimosso :root e messo i valori direttamente per un singolo file Vue */
-.screen-view {
-  min-height: 100vh;
-  background-color: #1e1e1e; /* Sfondo scuro per contrasto */
-  color: #f4f4f4; /* Testo chiaro */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 30px;
-  box-sizing: border-box;
-  font-family: 'Montserrat', sans-serif;
-}
+/* Colori delle card Tailwind */
+.message-card.color-1 { background-color: #0d9488; color: #f0fdfa; } /* Teal 700 */
+.message-card.color-2 { background-color: #f59e0b; color: #1e293b; } /* Amber 500 */
+.message-card.color-3 { background-color: #4ade80; color: #1e293b; } /* Green 400 */
 
-/* -------------------- HEADER E STATO -------------------- */
-
-.screen-header {
-  width: 100%;
-  text-align: center;
-  padding-bottom: 20px;
-  border-bottom: 2px solid #333;
-  margin-bottom: 30px;
-}
-
-.logo-text {
-  font-size: 5vw;
-  font-weight: 900;
-  text-transform: uppercase;
-  color: #f4f4f4;
-  text-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-}
-
-.tagline {
-  font-size: 1.5vw;
-  color: #9e9e9e;
-}
-
-.status-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-}
-
-.status-text {
-  font-size: 2.5em;
-  font-weight: 500;
-  color: #00bcd4;
-  animation: pulse 2s infinite;
-}
-
-.status-subtext {
-  font-size: 1.2em;
-  margin-top: 10px;
-  color: #9e9e9e;
-}
-
-/* -------------------- LOADER RING -------------------- */
-.loader-ring {
-  width: 60px;
-  height: 60px;
-  border: 5px solid rgba(255, 255, 255, 0.2);
-  border-top: 5px solid #00bcd4;
-  border-radius: 50%;
-  margin: 0 auto 20px;
-  animation: spin 1s linear infinite;
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-@keyframes pulse {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-/* -------------------- GRIGLIA MESSAGGI -------------------- */
-
-.message-grid-container {
-  width: 90%;
-  flex-grow: 1;
-}
-
-.message-grid {
-  display: grid;
-  /* Griglia reattiva: 3 colonne se lo schermo è grande, altrimenti si adatta */
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 30px;
-  padding: 20px;
-}
-
-.message-card {
-  position: relative;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
-  min-height: 180px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  transition: all 0.5s ease;
-}
-
-/* Variazioni di colore per le card */
-.message-card.color-1 {
-  background-color: #00bcd4;
-  color: #1e1e1e;
-}
-.message-card.color-2 {
-  background-color: #ff9800;
-  color: #1e1e1e;
-}
-.message-card.color-3 {
-  background-color: #4caf50;
-  color: #1e1e1e;
-}
-
-.message-text {
-  font-size: 2.2em; /* Testo molto grande */
-  font-weight: 600;
-  line-height: 1.2;
-  margin-bottom: 15px;
-  word-break: break-word;
-}
-
-.message-id {
-  font-size: 0.8em;
-  opacity: 0.7;
-  align-self: flex-end;
-}
-
-/* -------------------- ANIMAZIONI DI INGRESSO/USCITA -------------------- */
-
+/* Transizioni Tailwind: Sfruttiamo le classi per le transizioni */
 .message-flow-enter-active,
 .message-flow-leave-active {
-  transition: all 0.8s ease;
+    transition: all 0.5s ease-out;
 }
-
-/* Entrata con fade e leggero movimento verso l'alto (più visibile) */
 .message-flow-enter-from {
-  opacity: 0;
-  transform: translateY(50px) scale(0.9);
-}
-
-/* Movimento per gli elementi esistenti quando ne viene aggiunto uno nuovo (effetto di riordinamento) */
-.message-flow-move {
-  transition: transform 0.8s ease;
-}
-
-/* Gli elementi che escono devono avere position: absolute */
-.message-flow-leave-active {
-  position: absolute;
+    opacity: 0;
+    transform: translateY(20px);
 }
 .message-flow-leave-to {
-  opacity: 0;
-  transform: scale(0.8);
+    opacity: 0;
+    transform: scale(0.9);
 }
-
-/* Media Query per schermi molto grandi (migliore leggibilità) */
-@media (min-width: 1920px) {
-  .logo-text {
-    font-size: 4em;
-  }
-  .tagline {
-    font-size: 1.2em;
-  }
-  .message-text {
-    font-size: 2.8em;
-  }
+.message-flow-move {
+    transition: transform 0.5s ease;
 }
 </style>
