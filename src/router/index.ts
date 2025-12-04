@@ -25,6 +25,18 @@ const router = createRouter({
       meta: { requiresRole: 'Admin' as UserRole },
     },
     {
+      path: '/demo',
+      name: 'demo',
+      component: () => import('@/views/Admin/DemoView.vue'),
+      // METADATI: Richiede il ruolo 'Admin' per l'accesso
+      meta: { requiresRole: 'Admin' as UserRole },
+    },
+    {
+      path: '/info',
+      name: 'info',
+      component: () => import('../views/InfoView.vue'),
+    },
+    {
       path: '/screen',
       name: 'screen',
       component: () => import('@/views/ScreenView.vue'),

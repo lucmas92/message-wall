@@ -1,32 +1,56 @@
 <template>
-  <div class="login-container">
-    <h2>Accesso Riservato</h2>
-    <form @submit.prevent="handleLogin">
-      <div class="form-group">
-        <label for="username">Nome Utente:</label>
-        <input type="text" id="username" v-model="username" required :disabled="isLoading" />
-      </div>
-      <div class="form-group">
-        <label for="password">Password:</label>
-        <input
-          type="password"
-          id="password"
-          autocomplete="false"
-          v-model="password"
-          required
+  <div class="max-w-md mx-auto h-screen flex text-center justify-center items-center">
+    <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-xl mb-48">
+      <h2 class="text-3xl font-bold text-center text-gray-900">Accesso Riservato</h2>
+      <form @submit.prevent="handleLogin" class="space-y-6">
+        <div class="text-left">
+          <label for="nome_utente" class="block text-sm font-medium text-gray-700">
+            Nome Utente:
+          </label>
+          <input
+            type="text"
+            id="username"
+            class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm appearance-none placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            v-model.trim="username"
+            :disabled="isLoading"
+          />
+        </div>
+        <div class="text-left">
+          <label for="nome_utente" class="block text-sm font-medium text-gray-700">
+            Password:
+          </label>
+          <input
+            type="password"
+            id="password"
+            class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm appearance-none placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            autocomplete="false"
+            v-model.trim="password"
+            :disabled="isLoading"
+          />
+        </div>
+
+        <button
+          class="p-2 text-xs text-gray-400 border-0 text-4"
+          type="button"
+          @click="loginMonitor"
+        >
+          Login monitor
+        </button>
+        <button class="p-2 text-xs text-gray-400 border-0 text-4" type="button" @click="loginAdmin">
+          Login admin
+        </button>
+
+        <button
+          class="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          type="submit"
           :disabled="isLoading"
-        />
-      </div>
+        >
+          {{ isLoading ? 'Accesso in corso...' : 'Accedi' }}
+        </button>
 
-      <button type="button" @click="loginMonitor">Login monitor</button>
-      <button type="button" @click="loginAdmin">Login admin</button>
-
-      <button type="submit" :disabled="isLoading">
-        {{ isLoading ? 'Accesso in corso...' : 'Accedi' }}
-      </button>
-
-      <p v-if="error" class="error-message">❌ {{ error }}</p>
-    </form>
+        <p v-if="error" class="text-sm font-medium mt-3 text-red-600">❌ {{ error }}</p>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -57,78 +81,27 @@ async function handleLogin() {
   error.value = null
   isLoading.value = true
 
-  const role = await authService.login(username.value, password.value)
-
-  if (role) {
-    // Login riuscito: reindirizza in base al ruolo
-    if (role === 'Admin') {
-      router.push({ name: 'admin' })
-    } else if (role === 'Screen') {
-      router.push({ name: 'screen' })
-    } else {
-      router.push({ name: 'submit' }) // Se il ruolo non è specifico, torna alla home
-    }
-  } else {
+  if (username.value == '' || password.value == '') {
     // Login fallito
     error.value = 'Nome utente o password non validi.'
+  } else {
+    const role = await authService.login(username.value, password.value)
+
+    if (role) {
+      // Login riuscito: reindirizza in base al ruolo
+      if (role === 'Admin') {
+        await router.push({ name: 'admin' })
+      } else if (role === 'Screen') {
+        await router.push({ name: 'screen' })
+      } else {
+        await router.push({ name: 'submit' }) // Se il ruolo non è specifico, torna alla home
+      }
+    } else {
+      // Login fallito
+      error.value = 'Nome utente o password non validi.'
+    }
   }
 
   isLoading.value = false
 }
 </script>
-
-<style scoped>
-.login-container {
-  max-width: 400px;
-  margin: 100px auto;
-  padding: 30px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  background-color: #fff;
-  text-align: center;
-}
-h2 {
-  color: #333;
-  margin-bottom: 25px;
-}
-.form-group {
-  margin-bottom: 20px;
-  text-align: left;
-}
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  box-sizing: border-box;
-}
-button {
-  width: 100%;
-  padding: 12px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1em;
-  transition: background-color 0.3s;
-}
-button:hover:not(:disabled) {
-  background-color: #0056b3;
-}
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-.error-message {
-  color: #dc3545;
-  margin-top: 15px;
-  font-weight: bold;
-}
-</style>

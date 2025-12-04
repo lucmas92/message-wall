@@ -1,1 +1,31 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+/* -------------------------------------------------------------------------- */
+/* Utility personalizzate per la Safe Area (Funziona su iOS e Android moderni) */
+/* -------------------------------------------------------------------------- */
+
+/* Applica il padding SAFE AREA solo al top */
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Applica il padding SAFE AREA solo al bottom */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Applica il padding SAFE AREA su tutti i lati (come un padding orizzontale/verticale generico) */
+.p-safe {
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+}
+
+/* MARGINI (meno comuni, ma utili per elementi fixed) */
+.mt-safe {
+  margin-top: env(safe-area-inset-top);
+}
+.mb-safe {
+  margin-bottom: env(safe-area-inset-bottom);
+}

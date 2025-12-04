@@ -12,6 +12,14 @@ export default defineConfig({
     vueDevTools(),
     tailwindcss()
   ],
+
+  server: {
+    // Aggiungi l'host di ngrok per consentire l'accesso esterno
+    allowedHosts: ['a9b1e7d7537d.ngrok-free.app'],
+    // Opzionale: Se vuoi ascoltare su tutte le interfacce di rete (necessario con ngrok)
+    host: '0.0.0.0'
+  },
+
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
