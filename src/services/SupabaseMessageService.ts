@@ -135,7 +135,6 @@ export class SupabaseMessageService implements IMessageService {
           event: '*', // Ascolta INSERT, UPDATE, DELETE
           schema: 'public',
           table: MESSAGE_TABLE,
-          filter: `status=eq.approved`, // Ascolta SOLO i messaggi con status 'approved'
         },
         (payload) => {
           console.log(' Chiama la callback fornita ')

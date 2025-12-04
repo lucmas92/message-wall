@@ -120,14 +120,23 @@
                     <small class="text-xs text-gray-400">ID: {{ message.id.slice(-4) }}</small>
                   </div>
 
-                  <span
-                    :class="[
-                      'font-medium text-xs whitespace-nowrap',
-                      message.status === 'approved' ? 'text-green-700' : 'text-red-700',
-                    ]"
-                  >
-                    {{ message.status === 'approved' ? 'Approvato' : 'Rifiutato' }}
-                  </span>
+                  <div>
+                    <div
+                      :class="[
+                        'font-medium text-xs whitespace-nowrap',
+                        message.status === 'approved' ? 'text-green-700' : 'text-red-700',
+                      ]"
+                    >
+                      {{ message.status === 'approved' ? 'Approvato' : 'Rifiutato' }}
+                    </div>
+                    <button
+                      @click="updateStatus(message.id, 'rejected')"
+                      class="text-xs py-1 px-2 rounded font-semibold text-white transition disabled:opacity-50 bg-red-500 hover:bg-red-600"
+                      v-if="message.status == 'approved'"
+                    >
+                      Rifiuta
+                    </button>
+                  </div>
                 </li>
               </ul>
             </div>

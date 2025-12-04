@@ -164,25 +164,23 @@ function handleRealtimeChange(payload: RealtimePostgresChangesPayload<Message>) 
         if (index !== -1) {
           // Se lo status non è più 'approved', rimuoviamo il messaggio immediatamente
           if (newMessage.status !== 'approved') {
-            console.log('rimuovo messaggio ', index)
             approvedMessages.value.splice(index, 1)
           }
         } else {
-          console.log('aggiungo messaggio ', index)
-          if (!currentMessages.some((m) => m.id === newMessage.id)) {
+          if (
+            newMessage.status == 'approved' &&
+            !currentMessages.some((m) => m.id === newMessage.id)
+          ) {
             approvedMessages.value.push(newMessageNormalized)
             // Forza l'aggiornamento dei timer
             updateAllTimers()
+          } else if (
+            newMessage.status == 'rejected' &&
+            currentMessages.some((m) => m.id === newMessage.id)
+          ) {
+            approvedMessages.value = currentMessages.filter((m) => m.id !== oldMessage.id)
           }
         }
-      }
-      break
-
-    case 'DELETE':
-      console.log(' messaggi cancellato ', oldMessage)
-      // Se un messaggio è stato cancellato direttamente dal DB
-      if (oldMessage) {
-        approvedMessages.value = currentMessages.filter((m) => m.id !== oldMessage.id)
       }
       break
   }
