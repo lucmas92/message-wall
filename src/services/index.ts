@@ -19,4 +19,4 @@ export const messageService: IMessageService = new SupabaseMessageService()
 export const authService: IAuthService = new SupabaseAuthService()
 export { preloadRole } // Esporta la funzione di pre-caricamento
 
-export const profanityService = new ProfanityService();
+export const profanityService = new ProfanityService()

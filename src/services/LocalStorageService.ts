@@ -95,7 +95,7 @@ export class LocalStorageService implements IMessageService {
     // Tieni solo i messaggi che sono approvati E che NON sono ancora scaduti
     approvedMessages = approvedMessages.filter((msg) => {
       // Se non c'è un timestamp di scadenza O se la scadenza è nel futuro
-      return msg.display_until && msg.display_until > now
+      return msg.display_until && (msg.display_until as number) > now
     })
 
     // Filtra e restituisce SOLO quelli che non sono scaduti
@@ -109,5 +109,28 @@ export class LocalStorageService implements IMessageService {
     approvedMessages.sort((a, b) => (a.id > b.id ? 1 : -1))
 
     return approvedMessages
+  }
+
+  // Ottiene solo i messaggi approvati
+  async getPendingMessageCount(): Promise<number> {
+    await new Promise((resolve) => setTimeout(resolve, 50))
+
+    const now = Date.now()
+    const allMessages = this.loadMessages()
+
+    // 1. Filtraggio: Tieni solo i messaggi che sono 'approved'
+    let approvedMessages = allMessages.filter((m) => m.status === 'pending')
+
+    // 2. Simulazione della scadenza di visualizzazione:
+    // Tieni solo i messaggi che sono approvati E che NON sono ancora scaduti
+    approvedMessages = approvedMessages.filter((msg) => {
+      // Se non c'è un timestamp di scadenza O se la scadenza è nel futuro
+      return msg.display_until && (msg.display_until as number) > now
+    })
+
+    // Ordina per ID (simulando l'ordine di approvazione)
+    approvedMessages.sort((a, b) => (a.id > b.id ? 1 : -1))
+
+    return approvedMessages.length
   }
 }

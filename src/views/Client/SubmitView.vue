@@ -1,31 +1,27 @@
 <template>
   <div class="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4">
-    <div
-      class="w-full max-w-lg bg-gray-800 border border-indigo-900 shadow-2xl rounded-2xl mb-14 p-6 sm:p-10 transform transition-all duration-500 hover:shadow-indigo-700/50"
+    <h2
+      class="text-3xl my-6 font-extrabold text-white text-center drop-shadow-lg"
+      style="
+        text-shadow:
+          0 0 10px #6366f1,
+          0 0 20px #4f46e5;
+      "
     >
-      <h1
-        class="text-4xl font-extrabold text-white text-center mb-1 drop-shadow-lg"
-        style="
-          text-shadow:
-            0 0 10px #6366f1,
-            0 0 20px #4f46e5;
-        "
-      >
-        🚀 Proietta il tuo Messaggio
-      </h1>
-      <p class="text-center text-indigo-400 mb-8 text-lg font-light">
-        Scrivi qui sotto e preparati per il grande schermo.
-      </p>
-
+      Proietta il tuo messaggio
+    </h2>
+    <div
+      class="w-full max-w-xl bg-gray-800 border border-indigo-900 shadow-2xl rounded-2xl mb-14 p-6 sm:p-10 transform transition-all duration-500 hover:shadow-indigo-700/50"
+    >
       <div
         v-if="pendingCount !== null"
-        class="text-center mb-6 py-2 px-4 rounded-full"
+        class="text-center text-sm mb-6 py-2 px-4 rounded-full"
         :class="{
           'bg-yellow-800 text-yellow-300': pendingCount > 0,
           'bg-gray-700 text-gray-400': pendingCount === 0,
         }"
       >
-        <span class="font-bold">Coda di Moderazione:</span>
+        <span class="font-bold">Coda di moderazione:</span>
         <span v-if="pendingCount > 0" class="ml-1 animate-pulse"
           >{{ pendingCount }} messaggi in attesa</span
         >
@@ -56,7 +52,7 @@
           type="submit"
           v-if="!isProfane"
           :disabled="isSubmitting || !messageText.trim()"
-          class="w-full py-4 rounded-xl text-lg font-bold uppercase tracking-wider transition duration-300 ease-in-out bg-indigo-600 text-white shadow-lg shadow-indigo-500/50 hover:bg-indigo-500 hover:shadow-indigo-400/70 disabled:bg-gray-600 disabled:shadow-none disabled:cursor-not-allowed"
+          class="w-full py-2 rounded-xl text-lg font-bold uppercase tracking-wider transition duration-300 ease-in-out bg-indigo-600 text-white shadow-lg shadow-indigo-500/50 hover:bg-indigo-500 hover:shadow-indigo-400/70 disabled:bg-gray-600 disabled:shadow-none disabled:cursor-not-allowed"
         >
           <span v-if="isSubmitting" class="flex items-center justify-center">
             <svg
@@ -139,7 +135,7 @@ watch(
     // 4. (Opzionale) Se è profano, mostra immediatamente un messaggio di errore
     if (hasProfanity) {
       errorMessage.value = '🛑 Il messaggio contiene parole non permesse e non può essere inviato.'
-    } else if (errorMessage.value !== null && errorMessage.value.startsWith('🛑')) {
+    } else if (errorMessage.value && errorMessage.value.startsWith('🛑')) {
       // Pulisci l'errore specifico del profanity checker se l'utente corregge il testo
       errorMessage.value = null
     }

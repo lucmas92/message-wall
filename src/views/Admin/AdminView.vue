@@ -30,7 +30,9 @@
           class="bg-white p-4 rounded-lg shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center border-l-8 border-yellow-400"
         >
           <div class="message-content mb-3 sm:mb-0 sm:w-3/5">
-            <p class="text-gray-900 font-medium text-base whitespace-pre-wrap">{{ message.text }}</p>
+            <p class="text-gray-900 font-medium text-base whitespace-pre-wrap">
+              {{ message.text }}
+            </p>
             <small class="text-gray-400 text-xs">ID: {{ message.id.slice(-4) }}</small>
           </div>
 
@@ -56,79 +58,100 @@
       </ul>
 
       <div class="mt-8">
-        <div @click="showModerated = !showModerated"
-             class="flex justify-between items-center bg-white p-4 rounded-t-lg shadow-md cursor-pointer border-l-4 border-blue-500 hover:bg-gray-50 transition duration-150">
-
+        <div
+          @click="showModerated = !showModerated"
+          class="flex justify-between items-center bg-white p-4 rounded-t-lg shadow-md cursor-pointer border-l-4 border-blue-500 hover:bg-gray-50 transition duration-150"
+        >
           <h2 class="text-xl font-semibold text-gray-700">
             Già Moderati ({{ moderatedMessages.length }})
           </h2>
 
-          <svg :class="['w-5 h-5 text-gray-500 transition-transform duration-300', { 'rotate-180': showModerated }]"
-               xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          <svg
+            :class="[
+              'w-5 h-5 text-gray-500 transition-transform duration-300',
+              { 'rotate-180': showModerated },
+            ]"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
           </svg>
         </div>
 
         <Transition name="fade-slide">
-          <div v-show="showModerated" class="overflow-hidden bg-white rounded-b-lg shadow-md border-t border-gray-200">
-
+          <div
+            v-show="showModerated"
+            class="overflow-hidden bg-white rounded-b-lg shadow-md border-t border-gray-200"
+          >
             <div class="p-4 border-b border-gray-200">
-                <input
-                    type="text"
-                    v-model="searchTerm"
-                    placeholder="Cerca per testo o ID (ultime 4 cifre)..."
-                    class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                />
+              <input
+                type="text"
+                v-model="searchTerm"
+                placeholder="Cerca per testo o ID (ultime 4 cifre)..."
+                class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              />
             </div>
 
-            <div class="overflow-y-auto py-2" style="max-height: 400px;">
+            <div class="overflow-y-auto py-2" style="max-height: 400px">
+              <div v-if="moderatedMessages.length === 0" class="p-4 text-center text-gray-500">
+                Nessun messaggio trovato con la parola chiave "{{ searchTerm }}".
+              </div>
 
-                <div v-if="moderatedMessages.length === 0" class="p-4 text-center text-gray-500">
-                    Nessun messaggio trovato con la parola chiave "{{ searchTerm }}".
-                </div>
+              <ul class="space-y-2 text-sm p-4 pt-0">
+                <li
+                  v-for="message in moderatedMessages"
+                  :key="message.id"
+                  :class="[
+                    'p-3 rounded-lg flex justify-between items-center transition duration-100',
+                    message.status === 'approved'
+                      ? 'bg-green-50 border-l-4 border-green-500 hover:bg-green-100'
+                      : 'bg-red-50 border-l-4 border-red-500 hover:bg-red-100',
+                  ]"
+                >
+                  <div class="text-gray-700 w-full sm:w-3/4 mr-4">
+                    <p class="whitespace-pre-wrap">{{ message.text }}</p>
+                    <small class="text-xs text-gray-400">ID: {{ message.id.slice(-4) }}</small>
+                  </div>
 
-                <ul class="space-y-2 text-sm p-4 pt-0">
-                    <li v-for="message in moderatedMessages" :key="message.id"
-                        :class="['p-3 rounded-lg flex justify-between items-center transition duration-100',
-                                 message.status === 'approved' ? 'bg-green-50 border-l-4 border-green-500 hover:bg-green-100' :
-                                                                'bg-red-50 border-l-4 border-red-500 hover:bg-red-100']">
-
-                        <div class="text-gray-700 w-full sm:w-3/4 mr-4">
-                            <p class="whitespace-pre-wrap">{{ message.text }}</p>
-                            <small class="text-xs text-gray-400">ID: {{ message.id.slice(-4) }}</small>
-                        </div>
-
-                        <span :class="['font-medium text-xs whitespace-nowrap',
-                                       message.status === 'approved' ? 'text-green-700' : 'text-red-700']">
-                            {{ message.status === 'approved' ? 'Approvato' : 'Rifiutato' }}
-                        </span>
-                    </li>
-                </ul>
+                  <span
+                    :class="[
+                      'font-medium text-xs whitespace-nowrap',
+                      message.status === 'approved' ? 'text-green-700' : 'text-red-700',
+                    ]"
+                  >
+                    {{ message.status === 'approved' ? 'Approvato' : 'Rifiutato' }}
+                  </span>
+                </li>
+              </ul>
             </div>
-
           </div>
         </Transition>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'; // Assicurati che 'computed' sia importato
-import { messageService, authService } from '@/services';
-import { useRouter } from 'vue-router';
-import type { Message } from '@/services/MessageService';
+import { ref, onMounted, onUnmounted, computed } from 'vue' // Assicurati che 'computed' sia importato
+import { messageService, authService } from '@/services'
+import { useRouter } from 'vue-router'
+import type { Message } from '@/services/MessageService'
 
 const router = useRouter()
 
-
 // --- STATO REATTIVO ---
-const showModerated = ref(false);
+const showModerated = ref(false)
 const allMessages = ref<Message[]>([])
 const updateStatusMap = ref(new Map<string, '...' | 'pending' | 'approved' | 'rejected'>())
 const isLoading = ref(true) // Stato di caricamento iniziale/polling
-const searchTerm = ref('');
+const searchTerm = ref('')
 
 // --- LOGICA POLLING ---
 const POLLING_RATE = 10000 // Aggiorna ogni 10 secondi
@@ -141,22 +164,22 @@ const pendingMessages = computed(() => {
 
 const moderatedMessages = computed(() => {
   // Filtra TUTTI i messaggi che non sono 'pending'
-  let filtered = allMessages.value.filter(m => m.status !== 'pending');
+  let filtered = allMessages.value.filter((m) => m.status !== 'pending')
 
   // Applica il filtro del testo di ricerca, se presente
   if (searchTerm.value.trim()) {
-      const lowerCaseSearch = searchTerm.value.toLowerCase().trim();
+    const lowerCaseSearch = searchTerm.value.toLowerCase().trim()
 
-      // Filtra per testo del messaggio o ID (solo le ultime 4 cifre per comodità)
-      filtered = filtered.filter(m =>
-          m.text.toLowerCase().includes(lowerCaseSearch) ||
-          m.id.slice(-4).includes(lowerCaseSearch)
-      );
+    // Filtra per testo del messaggio o ID (solo le ultime 4 cifre per comodità)
+    filtered = filtered.filter(
+      (m) =>
+        m.text.toLowerCase().includes(lowerCaseSearch) || m.id.slice(-4).includes(lowerCaseSearch),
+    )
   }
 
   // Ordina per ID decrescente, in modo che i più recenti siano in alto nel pannello
-  return filtered.sort((a, b) => (parseInt(a.id) > parseInt(b.id) ? -1 : 1));
-});
+  return filtered.sort((a, b) => (parseInt(a.id) > parseInt(b.id) ? -1 : 1))
+})
 
 /**
  * Funzione principale per caricare tutti i messaggi e categorizzarli.
@@ -234,7 +257,9 @@ onUnmounted(stopPolling)
 .fade-slide-enter-active,
 .fade-slide-leave-active {
   /* Transizione per l'altezza automatica (richiede trick per un smooth collapse) */
-  transition: opacity 0.3s ease-in-out, max-height 0.5s ease-in-out;
+  transition:
+    opacity 0.3s ease-in-out,
+    max-height 0.5s ease-in-out;
   max-height: 1000px; /* Abbastanza grande per contenere tutti i messaggi */
   opacity: 1;
 }

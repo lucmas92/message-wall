@@ -1,5 +1,7 @@
 // src/services/MessageService.ts
 
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
+
 /**
  * Definisce la struttura di un messaggio.
  * Usiamo 'pending' come valore di default in questo contesto.
@@ -8,8 +10,9 @@ export interface Message {
   text: string
   status: 'pending' | 'approved' | 'rejected' | '...'
   id: string // Opzionale per l'inserimento
-  display_until?: number
+  display_until?: number | string | Date
 }
+export type Callback = (payload: RealtimePostgresChangesPayload<Message>) => void
 
 /**
  * L'interfaccia (il contratto) che ogni implementazione del servizio
@@ -29,4 +32,8 @@ export interface IMessageService {
 
   // Ottiene solo i messaggi approvati per lo schermo gigante
   getApprovedMessages(): Promise<Message[]>
+
+  // Ottiene solo i messaggi approvati per lo schermo gigante
+  getPendingMessageCount(): Promise<number>
+  subscribeToApprovedMessages(callback: Callback): () => void
 }

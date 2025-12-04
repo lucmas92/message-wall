@@ -1,5 +1,6 @@
 import { supabase } from '@/supabase'
 import type { IMessageService, Message } from './MessageService'
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 
 // Nome della tabella che useremo in Supabase
 const MESSAGE_TABLE = 'messages'
@@ -113,5 +114,45 @@ export class SupabaseMessageService implements IMessageService {
     }
 
     return count ?? 0
+  }
+
+  /**
+   * Stabilisce l'abbonamento Real-Time per i messaggi approvati.
+   * * @param callback Funzione da chiamare quando i dati cambiano.
+   * @returns Una funzione per disabbonarsi.
+   */
+  subscribeToApprovedMessages(
+    callback: (message: RealtimePostgresChangesPayload<Message>) => void,
+  ): () => void {
+    // 1. Definisce il canale di Real-Time.
+    // L'abbonamento è configurato per ascoltare solo i cambiamenti (INSERT, UPDATE)
+    // sulla tabella 'messages' che soddisfano la condizione di filtro.
+    const subscription = supabase
+      .channel('approved-messages-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Ascolta INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: MESSAGE_TABLE,
+          filter: `status=eq.approved`, // Ascolta SOLO i messaggi con status 'approved'
+        },
+        (payload) => {
+          console.log(' Chiama la callback fornita ')
+          // Chiama la callback fornita dalla vista con il payload di Supabase
+          callback(payload as RealtimePostgresChangesPayload<Message>)
+        },
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('Real-Time: Canale approvato sottoscritto con successo.')
+        }
+      })
+
+    // 2. Restituisce una funzione per disabbonarsi (da usare in onUnmounted)
+    return () => {
+      supabase.removeChannel(subscription)
+      console.log('Real-Time: Canale disabbonato.')
+    }
   }
 }
