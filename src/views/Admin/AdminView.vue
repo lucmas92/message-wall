@@ -11,138 +11,180 @@
         </button>
       </div>
 
-      <h2 class="text-xl font-semibold text-gray-700 mb-4 border-l-4 border-yellow-500 pl-2">
-        Da Moderare ({{ pendingMessages.length }})
-        <span v-if="isLoading" class="text-sm text-gray-500 ml-2">(Aggiornamento...)</span>
-      </h2>
-
-      <div
-        v-if="pendingMessages.length === 0"
-        class="p-4 bg-white rounded-lg shadow-sm text-center text-gray-500"
-      >
-        Nessun nuovo messaggio in attesa.
+      <div class="text-sm font-medium text-center text-body border-b border-default">
+        <ul class="flex justify-around flex-wrap -mb-px">
+          <li class="w-1/2">
+            <button
+              @click="selectedTab = 'pending'"
+              class="w-full"
+              :class="[
+                selectedTab === 'pending'
+                  ? 'inline-block text-blue-500 p-4 text-fg-brand border-b border-brand rounded-t-base active'
+                  : 'inline-block p-4 border-b border-transparent rounded-t-base hover:text-fg-brand hover:border-brand',
+              ]"
+            >
+              Da moderare
+            </button>
+          </li>
+          <li class="w-1/2">
+            <button
+              @click="selectedTab = 'moderated'"
+              class="w-full"
+              :class="[
+                selectedTab === 'moderated'
+                  ? 'inline-block text-blue-500 p-4 text-fg-brand border-b border-brand rounded-t-base active'
+                  : 'inline-block p-4 border-b border-transparent rounded-t-base hover:text-fg-brand hover:border-brand',
+              ]"
+              aria-current="page"
+            >
+              Moderati
+            </button>
+          </li>
+        </ul>
       </div>
 
-      <ul class="space-y-4">
-        <li
-          v-for="message in pendingMessages"
-          :key="message.id"
-          class="bg-white p-4 rounded-lg shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center border-l-8 border-yellow-400"
-        >
-          <div class="message-content mb-3 sm:mb-0 sm:w-3/5">
-            <p class="text-gray-900 font-medium text-base whitespace-pre-wrap">
-              {{ message.text }}
-            </p>
-            <small class="text-gray-400 text-xs">ID: {{ message.id.slice(-4) }}</small>
-          </div>
+      <section v-if="selectedTab == 'pending'" class="py-4">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4 border-l-4 border-yellow-500 pl-2">
+          Da Moderare ({{ pendingMessages.length }})
+        </h2>
 
-          <div class="flex space-x-2 w-full sm:w-auto">
-            <button
-              @click="updateStatus(message.id, 'approved')"
-              :disabled="message.status === '...'"
-              class="flex-1 min-w-32 py-2 rounded font-semibold text-white transition disabled:opacity-50 bg-green-500 hover:bg-green-600"
-            >
-              <span v-if="message.status === '...'">...</span>
-              <span v-else>✅ Approva</span>
-            </button>
-            <button
-              @click="updateStatus(message.id, 'rejected')"
-              :disabled="message.status === '...'"
-              class="flex-1 min-w-32 py-2 rounded font-semibold text-white transition disabled:opacity-50 bg-red-500 hover:bg-red-600"
-            >
-              <span v-if="message.status === '...'">...</span>
-              <span v-else>❌ Rifiuta</span>
-            </button>
-          </div>
-        </li>
-      </ul>
-
-      <div class="mt-8">
         <div
-          @click="showModerated = !showModerated"
-          class="flex justify-between items-center bg-white p-4 rounded-t-lg shadow-md cursor-pointer border-l-4 border-blue-500 hover:bg-gray-50 transition duration-150"
+          v-if="selectedTab == 'pending' && pendingMessages.length === 0"
+          class="p-4 bg-white rounded-lg shadow-sm text-center text-gray-500"
         >
-          <h2 class="text-xl font-semibold text-gray-700">
-            Già Moderati ({{ moderatedMessages.length }})
-          </h2>
-
-          <svg
-            :class="[
-              'w-5 h-5 text-gray-500 transition-transform duration-300',
-              { 'rotate-180': showModerated },
-            ]"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
+          Nessun nuovo messaggio in attesa.
         </div>
 
-        <Transition name="fade-slide">
-          <div
-            v-show="showModerated"
-            class="overflow-hidden bg-white rounded-b-lg shadow-md border-t border-gray-200"
+        <ul class="space-y-4" v-if="selectedTab == 'pending'">
+          <li
+            v-for="message in pendingMessages"
+            :key="message.id"
+            class="bg-white p-4 rounded-lg shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center border-l-8 border-yellow-400"
           >
-            <div class="p-4 border-b border-gray-200">
-              <input
-                type="text"
-                v-model="searchTerm"
-                placeholder="Cerca per testo o ID (ultime 4 cifre)..."
-                class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              />
+            <div class="message-content mb-3 sm:mb-0 sm:w-3/5">
+              <p class="text-gray-900 font-medium text-base whitespace-pre-wrap">
+                {{ message.text }}
+              </p>
+              <small class="text-gray-400 text-xs">ID: {{ message.id.slice(-4) }}</small>
             </div>
 
-            <div class="overflow-y-auto py-2" style="max-height: 400px">
-              <div v-if="moderatedMessages.length === 0" class="p-4 text-center text-gray-500">
-                Nessun messaggio trovato con la parola chiave "{{ searchTerm }}".
+            <div class="flex space-x-2 w-full sm:w-auto">
+              <button
+                @click="updateStatus(message.id, 'approved')"
+                :disabled="message.status === '...'"
+                class="flex-1 min-w-32 py-2 rounded font-semibold text-white transition disabled:opacity-50 bg-green-500 hover:bg-green-600"
+              >
+                <span v-if="message.status === '...'">...</span>
+                <span v-else>✅ Approva</span>
+              </button>
+              <button
+                @click="updateStatus(message.id, 'rejected')"
+                :disabled="message.status === '...'"
+                class="flex-1 min-w-32 py-2 rounded font-semibold text-white transition disabled:opacity-50 bg-red-500 hover:bg-red-600"
+              >
+                <span v-if="message.status === '...'">...</span>
+                <span v-else>❌ Rifiuta</span>
+              </button>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section v-if="selectedTab == 'moderated'" class="py-4">
+        <div class="mt-8">
+          <div
+            @click="showModerated = !showModerated"
+            class="flex justify-between items-center bg-white p-4 rounded-t-lg shadow-md cursor-pointer border-l-4 border-blue-500 hover:bg-gray-50 transition duration-150"
+          >
+            <h2 class="text-xl font-semibold text-gray-700">
+              Già Moderati ({{ moderatedMessages.length }})
+            </h2>
+
+            <svg
+              :class="[
+                'w-5 h-5 text-gray-500 transition-transform duration-300',
+                { 'rotate-180': showModerated },
+              ]"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
+
+          <Transition name="fade-slide">
+            <div
+              v-show="showModerated"
+              class="overflow-hidden bg-white rounded-b-lg shadow-md border-t border-gray-200"
+            >
+              <div class="p-4 border-b border-gray-200">
+                <input
+                  type="text"
+                  v-model="searchTerm"
+                  placeholder="Cerca per testo o ID (ultime 4 cifre)..."
+                  class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                />
               </div>
 
-              <ul class="space-y-2 text-sm p-4 pt-0">
-                <li
-                  v-for="message in moderatedMessages"
-                  :key="message.id"
-                  :class="[
-                    'p-3 rounded-lg flex justify-between items-center transition duration-100',
-                    message.status === 'approved'
-                      ? 'bg-green-50 border-l-4 border-green-500 hover:bg-green-100'
-                      : 'bg-red-50 border-l-4 border-red-500 hover:bg-red-100',
-                  ]"
-                >
-                  <div class="text-gray-700 w-full sm:w-3/4 mr-4">
-                    <p class="whitespace-pre-wrap">{{ message.text }}</p>
-                    <small class="text-xs text-gray-400">ID: {{ message.id.slice(-4) }}</small>
-                  </div>
+              <div class="overflow-y-auto py-2" style="max-height: 400px">
+                <div v-if="moderatedMessages.length === 0" class="p-4 text-center text-gray-500">
+                  Nessun messaggio trovato con la parola chiave "{{ searchTerm }}".
+                </div>
 
-                  <div>
-                    <div
-                      :class="[
-                        'font-medium text-xs whitespace-nowrap',
-                        message.status === 'approved' ? 'text-green-700' : 'text-red-700',
-                      ]"
-                    >
-                      {{ message.status === 'approved' ? 'Approvato' : 'Rifiutato' }}
+                <ul class="space-y-2 text-sm p-4 pt-0">
+                  <li
+                    v-for="message in moderatedMessages"
+                    :key="message.id"
+                    :class="[
+                      'p-3 rounded-lg flex justify-between items-center transition duration-100',
+                      message.status === 'approved'
+                        ? 'bg-green-50 border-l-4 border-green-500 hover:bg-green-100'
+                        : 'bg-red-50 border-l-4 border-red-500 hover:bg-red-100',
+                    ]"
+                  >
+                    <div class="text-gray-700 w-full sm:w-3/4 mr-4">
+                      <p class="whitespace-pre-wrap">{{ message.text }}</p>
+                      <small class="text-xs text-gray-400">ID: {{ message.id.slice(-4) }}</small>
                     </div>
-                    <button
-                      @click="updateStatus(message.id, 'rejected')"
-                      class="text-xs py-1 px-2 rounded font-semibold text-white transition disabled:opacity-50 bg-red-500 hover:bg-red-600"
-                      v-if="message.status == 'approved'"
-                    >
-                      Rifiuta
-                    </button>
-                  </div>
-                </li>
-              </ul>
+
+                    <div>
+                      <div
+                        :class="[
+                          'font-medium text-xs whitespace-nowrap',
+                          message.status === 'approved' ? 'text-green-700' : 'text-red-700',
+                        ]"
+                      >
+                        {{ message.status === 'approved' ? 'Approvato' : 'Rifiutato' }}
+                      </div>
+                      <button
+                        @click="updateStatus(message.id, 'approved')"
+                        class="text-xs py-1 px-2 rounded font-semibold text-white transition disabled:opacity-50 bg-green-500 hover:bg-green-600"
+                        v-if="message.status == 'rejected'"
+                      >
+                        Approva
+                      </button>
+                      <button
+                        @click="updateStatus(message.id, 'rejected')"
+                        class="text-xs py-1 px-2 rounded font-semibold text-white transition disabled:opacity-50 bg-red-500 hover:bg-red-600"
+                        v-if="message.status == 'approved'"
+                      >
+                        Rifiuta
+                      </button>
+                    </div>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
-        </Transition>
-      </div>
+          </Transition>
+        </div>
+      </section>
     </div>
   </div>
 </template>
@@ -161,6 +203,7 @@ const allMessages = ref<Message[]>([])
 const updateStatusMap = ref(new Map<string, '...' | 'pending' | 'approved' | 'rejected'>())
 const isLoading = ref(true) // Stato di caricamento iniziale/polling
 const searchTerm = ref('')
+const selectedTab = ref<'pending' | 'moderated'>('pending')
 
 // --- LOGICA POLLING ---
 const POLLING_RATE = 10000 // Aggiorna ogni 10 secondi

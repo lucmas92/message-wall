@@ -10,7 +10,7 @@ export interface Message {
   text: string
   status: 'pending' | 'approved' | 'rejected' | '...'
   id: string // Opzionale per l'inserimento
-  display_until?: number | string | Date
+  display_until?: number | Date
 }
 export type Callback = (payload: RealtimePostgresChangesPayload<Message>) => void
 

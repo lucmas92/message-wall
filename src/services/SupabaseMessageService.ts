@@ -12,7 +12,7 @@ const mapToMessage = (data: Message): Message => ({
   text: data.text,
   status: data.status,
   id: data.id.toString(),
-  display_until: data.display_until ? new Date(data.display_until).getTime() : undefined,
+  display_until: data.display_until,
 })
 
 export class SupabaseMessageService implements IMessageService {
@@ -56,7 +56,7 @@ export class SupabaseMessageService implements IMessageService {
   async updateMessageStatus(id: string, newStatus: Message['status']): Promise<void> {
     interface data {
       status: 'pending' | 'approved' | 'rejected' | '...'
-      display_until?: string | null
+      display_until?: number | string | null
     }
 
     const updateData: data = {
@@ -124,7 +124,7 @@ export class SupabaseMessageService implements IMessageService {
   subscribeToApprovedMessages(
     callback: (message: RealtimePostgresChangesPayload<Message>) => void,
   ): () => void {
-    // 1. Definisce il canale di Real-Time.
+    // Definisce il canale di Real-Time.
     // L'abbonamento è configurato per ascoltare solo i cambiamenti (INSERT, UPDATE)
     // sulla tabella 'messages' che soddisfano la condizione di filtro.
     const subscription = supabase
@@ -137,7 +137,6 @@ export class SupabaseMessageService implements IMessageService {
           table: MESSAGE_TABLE,
         },
         (payload) => {
-          console.log(' Chiama la callback fornita ')
           // Chiama la callback fornita dalla vista con il payload di Supabase
           callback(payload as RealtimePostgresChangesPayload<Message>)
         },
@@ -148,7 +147,7 @@ export class SupabaseMessageService implements IMessageService {
         }
       })
 
-    // 2. Restituisce una funzione per disabbonarsi (da usare in onUnmounted)
+    // Restituisce una funzione per disabbonarsi (da usare in onUnmounted)
     return () => {
       supabase.removeChannel(subscription)
       console.log('Real-Time: Canale disabbonato.')

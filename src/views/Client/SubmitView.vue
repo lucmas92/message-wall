@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4">
+  <div class="min-h-screen bg-gray-900 flex flex-col items-center justify-start p-4">
     <h2
-      class="text-3xl my-6 font-extrabold text-white text-center drop-shadow-lg"
+      class="text-3xl my-8 font-extrabold text-white text-center drop-shadow-lg"
       style="
         text-shadow:
           0 0 10px #6366f1,
@@ -11,11 +11,11 @@
       Proietta il tuo messaggio
     </h2>
     <div
-      class="w-full max-w-xl bg-gray-800 border border-indigo-900 shadow-2xl rounded-2xl mb-14 p-6 sm:p-10 transform transition-all duration-500 hover:shadow-indigo-700/50"
+      class="w-full max-w-xl bg-gray-800 border border-indigo-900 shadow-2xl rounded-2xl p-6 sm:p-10 transform transition-all duration-500 hover:shadow-indigo-700/50"
     >
       <div
         v-if="pendingCount !== null"
-        class="text-center text-sm mb-6 py-2 px-4 rounded-full"
+        class="text-center text-xs mb-6 py-2 px-4 rounded-full"
         :class="{
           'bg-yellow-800 text-yellow-300': pendingCount > 0,
           'bg-gray-700 text-gray-400': pendingCount === 0,
@@ -33,8 +33,9 @@
           v-model="messageText"
           :disabled="isSubmitting"
           placeholder="Digita qui il tuo pensiero..."
-          maxlength="250"
-          rows="6"
+          :maxlength="MAX_CHARS"
+          @input="handleInput"
+          rows="3"
           class="w-full p-4 border-2 rounded-xl bg-gray-700 text-white text-lg transition duration-300 ease-in-out resize-none border-indigo-600 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/50 shadow-inner shadow-gray-900/50 disabled:opacity-60 disabled:cursor-not-allowed"
         ></textarea>
 
@@ -43,15 +44,15 @@
             class="text-sm font-medium"
             :class="messageText.length > 220 ? 'text-red-400' : 'text-indigo-400'"
           >
-            {{ 250 - messageText.length }} caratteri rimanenti
+            {{ MAX_CHARS - messageText.length }} caratteri rimanenti
           </div>
-          <small class="text-xs text-gray-500">Max 250 caratteri</small>
+          <small class="text-xs text-gray-500">Max {{ MAX_CHARS }} caratteri</small>
         </div>
 
         <button
           type="submit"
           v-if="!isProfane"
-          :disabled="isSubmitting || !messageText.trim()"
+          :disabled="isSubmitting || !messageText.trim() || errorMessage"
           class="w-full py-2 rounded-xl text-lg font-bold uppercase tracking-wider transition duration-300 ease-in-out bg-indigo-600 text-white shadow-lg shadow-indigo-500/50 hover:bg-indigo-500 hover:shadow-indigo-400/70 disabled:bg-gray-600 disabled:shadow-none disabled:cursor-not-allowed"
         >
           <span v-if="isSubmitting" class="flex items-center justify-center">
@@ -113,18 +114,45 @@ const isSubmitting = ref(false)
 const successMessage = ref<string | null>(null)
 const errorMessage = ref<string | null>(null)
 
+const MAX_CHARS = 250
+
+const MAX_LINES = 5
+
 const pendingCount = ref<number | null>(null) // Stato per il contatore
 const COUNT_POLLING_RATE = 20000 // Aggiorna ogni 20 secondi
 let countPollingInterval: number | undefined
 
 const isProfane = ref(false)
+const handleInput = (event: Event) => {
+  const textarea = event.target as HTMLTextAreaElement
+  let newValue = textarea.value
+  // Applica il limite di caratteri
+  if (newValue.length > MAX_CHARS) {
+    newValue = newValue.substring(0, MAX_CHARS)
+    errorMessage.value = `Il messaggio supera i limiti consentiti: ${MAX_CHARS} caratteri.`
+  }
+  // Applica il limite di righe
+  const currentLines = (newValue.match(/\n/g) || []).length
 
+  if (currentLines >= MAX_LINES) {
+    // Se si tenta di inserire un'altra nuova linea, rimuovila
+    const lastNewlineIndex = newValue.lastIndexOf('\n')
+    const lastChar = newValue.substring(newValue.length - 1)
+    if (lastNewlineIndex !== -1 && lastChar === '\n') {
+      newValue = newValue.substring(0, newValue.length - 1)
+    }
+  }
+
+  // Aggiorna il valore reattivo (potrebbe essere stato troncato)
+  messageText.value = newValue
+}
 watch(
   messageText,
   (newText) => {
-    // 1. Rimuovi immediatamente i messaggi di successo/errore passati
-    successMessage.value = null
-    errorMessage.value = null
+    // if (newText.length > 0) {
+    //   successMessage.value = null
+    //   errorMessage.value = null
+    // }
 
     // 2. Esegui il controllo del servizio
     const hasProfanity = profanityService.check(newText)

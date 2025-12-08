@@ -80,7 +80,7 @@ function normalizeMessage(message: Message): Message {
   // 2. Uniforma display_until a Stringa ISO (se arriva come numero)
   // Se è un numero (Timestamp Unix in ms), convertilo in stringa ISO
   if (typeof message.display_until === 'number') {
-    message.display_until = new Date(message.display_until).toISOString()
+    message.display_until = new Date(message.display_until).getTime()
   }
   // Altrimenti, assumiamo che sia già una stringa ISO (come nel payload Real-Time)
 
@@ -137,7 +137,6 @@ function stopTimer() {
  */
 function handleRealtimeChange(payload: RealtimePostgresChangesPayload<Message>) {
   const newMessage = payload.new as Message
-  const oldMessage = payload.old as Message
 
   const newMessageNormalized = normalizeMessage(newMessage)
   // Assicuriamoci che l'array sia reattivo
@@ -145,9 +144,8 @@ function handleRealtimeChange(payload: RealtimePostgresChangesPayload<Message>) 
 
   switch (payload.eventType) {
     case 'INSERT':
-      console.log(' Nuovi messaggi approvati ', newMessage)
       // Nuovi messaggi approvati (filtrati dal servizio)
-      if (newMessage) {
+      if (newMessage && newMessage.status == 'approved') {
         if (!currentMessages.some((m) => m.id === newMessage.id)) {
           approvedMessages.value.push(newMessage)
           // Forza l'aggiornamento dei timer
@@ -157,29 +155,21 @@ function handleRealtimeChange(payload: RealtimePostgresChangesPayload<Message>) 
       break
 
     case 'UPDATE':
-      console.log(' Messaggio aggiornato nel DB ', newMessage, currentMessages)
       // Messaggio aggiornato nel DB (es. rimosso il flag 'approved' o cambiato il testo)
-      if (newMessage) {
-        const index = currentMessages.findIndex((m) => m.id === newMessage.id)
-        if (index !== -1) {
-          // Se lo status non è più 'approved', rimuoviamo il messaggio immediatamente
-          if (newMessage.status !== 'approved') {
-            approvedMessages.value.splice(index, 1)
-          }
-        } else {
-          if (
-            newMessage.status == 'approved' &&
-            !currentMessages.some((m) => m.id === newMessage.id)
-          ) {
-            approvedMessages.value.push(newMessageNormalized)
-            // Forza l'aggiornamento dei timer
-            updateAllTimers()
-          } else if (
-            newMessage.status == 'rejected' &&
-            currentMessages.some((m) => m.id === newMessage.id)
-          ) {
-            approvedMessages.value = currentMessages.filter((m) => m.id !== oldMessage.id)
-          }
+      const index = currentMessages.findIndex((m) => m.id === newMessage.id)
+      if (index !== -1) {
+        // Se lo status non è più 'approved', rimuoviamo il messaggio immediatamente
+        if (newMessage.status !== 'approved') {
+          approvedMessages.value.splice(index, 1)
+        }
+      } else {
+        if (
+          newMessage.status == 'approved' &&
+          !currentMessages.some((m) => m.id === newMessage.id)
+        ) {
+          approvedMessages.value.push(newMessageNormalized)
+          // Forza l'aggiornamento dei timer
+          updateAllTimers()
         }
       }
       break
@@ -217,16 +207,14 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div
-    class="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4 pt-safe pb-safe"
-  >
+  <div class="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4">
     <div v-if="isLoading" class="text-white text-xl animate-pulse">Caricamento bacheca live...</div>
 
     <div v-else-if="approvedMessages.length > 0" class="w-full max-w-7xl flex-grow">
       <transition-group
         name="message-flow"
         tag="div"
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
       >
         <div
           v-for="message in approvedMessages"

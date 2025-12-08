@@ -52,17 +52,16 @@ router.beforeEach((to, from, next) => {
 
   if (requiredRole) {
     const currentRole = authService.getCurrentRole()
-    console.log('currentRole', currentRole, requiredRole)
 
-    // 1. Controlla se l'utente è loggato e ha il ruolo corretto
+    // Controlla se l'utente è loggato e ha il ruolo corretto
     if (currentRole === requiredRole) {
       next() // Tutto ok
     }
-    // 2. L'Admin può accedere a tutto (opzionale: una regola per comodità)
+    // L'Admin può accedere a tutto (opzionale: una regola per comodità)
     else if (currentRole === 'Admin' && requiredRole === 'Screen') {
       next()
     }
-    // 3. Reindirizzamento al login se non autorizzato
+    // Reindirizzamento al login se non autorizzato
     else {
       // Passiamo l'URL di destinazione come query per tornare indietro dopo il login
       next({ name: 'login', query: { redirect: to.fullPath } })

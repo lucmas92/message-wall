@@ -88,22 +88,15 @@ export class LocalStorageService implements IMessageService {
     const now = Date.now()
     const allMessages = this.loadMessages()
 
-    // 1. Filtraggio: Tieni solo i messaggi che sono 'approved'
+    // Filtraggio: Tieni solo i messaggi che sono 'approved'
     let approvedMessages = allMessages.filter((m) => m.status === 'approved')
 
-    // 2. Simulazione della scadenza di visualizzazione:
+    // Simulazione della scadenza di visualizzazione:
     // Tieni solo i messaggi che sono approvati E che NON sono ancora scaduti
     approvedMessages = approvedMessages.filter((msg) => {
       // Se non c'è un timestamp di scadenza O se la scadenza è nel futuro
       return msg.display_until && (msg.display_until as number) > now
     })
-
-    // Filtra e restituisce SOLO quelli che non sono scaduti
-    // ATTENZIONE: per il LocalStorage, usiamo la logica di *non* visualizzazione
-    // Per il mock, è più semplice gestire la scomparsa sul lato Vue.
-
-    // **Rimaniamo sulla versione più semplice per il LocalStorage:**
-    // Restituiamo semplicemente tutti gli approvati e gestiamo la scomparsa in Vue.
 
     // Ordina per ID (simulando l'ordine di approvazione)
     approvedMessages.sort((a, b) => (a.id > b.id ? 1 : -1))
@@ -115,21 +108,10 @@ export class LocalStorageService implements IMessageService {
   async getPendingMessageCount(): Promise<number> {
     await new Promise((resolve) => setTimeout(resolve, 50))
 
-    const now = Date.now()
     const allMessages = this.loadMessages()
 
-    // 1. Filtraggio: Tieni solo i messaggi che sono 'approved'
+    // Filtraggio: Tieni solo i messaggi che sono 'pending'
     let approvedMessages = allMessages.filter((m) => m.status === 'pending')
-
-    // 2. Simulazione della scadenza di visualizzazione:
-    // Tieni solo i messaggi che sono approvati E che NON sono ancora scaduti
-    approvedMessages = approvedMessages.filter((msg) => {
-      // Se non c'è un timestamp di scadenza O se la scadenza è nel futuro
-      return msg.display_until && (msg.display_until as number) > now
-    })
-
-    // Ordina per ID (simulando l'ordine di approvazione)
-    approvedMessages.sort((a, b) => (a.id > b.id ? 1 : -1))
 
     return approvedMessages.length
   }

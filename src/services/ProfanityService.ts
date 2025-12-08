@@ -89,17 +89,17 @@ export class ProfanityService {
       return false
     }
 
-    // 1. Normalizzazione: minuscolo, Leet Speak
+    // Normalizzazione: minuscolo, Leet Speak
     const normalized = leetNormalize(text.toLowerCase())
 
     // Rimuove la punteggiatura ambigua, ma manteniamo gli spazi temporaneamente
     const punctuationFree = normalized.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
 
-    // 2. Creazione della Stringa di Ricerca Continua (con delimitatore '#')
+    // Creazione della Stringa di Ricerca Continua (con delimitatore '#')
     // Sostituiamo gli spazi con '#'. Rimuoviamo gli altri caratteri non alfanumerici che potrebbero essere rimasti.
     const searchString = punctuationFree.replace(/\s+/g, '#').replace(/[^a-z0-9#]/g, '')
 
-    // 3. Aggiungiamo un delimitatore di fine stringa per il check di parole esatte alla fine del testo
+    // Aggiungiamo un delimitatore di fine stringa per il check di parole esatte alla fine del testo
     // Esempio: "che figa" -> "che#figa#". Questo permette a "figa#" di matchare.
     const finalSearchString = searchString + '#'
 
@@ -107,7 +107,7 @@ export class ProfanityService {
       return false
     }
 
-    // 4. Verifica la presenza di una corrispondenza
+    // Verifica la presenza di una corrispondenza
     for (const profaneWord of PROFANITY_LIST) {
       // Verifichiamo se la parola in lista è una radice (non finisce con #) o una parola esatta (finisce con #)
       if (profaneWord.endsWith('#')) {
