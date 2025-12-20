@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { messageService } from '@/services'
 import type { Message } from '@/services/MessageService'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
+import QrCode from '@/views/QrCode.vue'
 
 // --- STATI REATTIVI ---
 const approvedMessages = ref<Message[]>([])
@@ -244,6 +245,7 @@ onUnmounted(() => {
     <div v-else class="text-center text-gray-500 text-2xl p-8">
       Nessun messaggio approvato in coda. Invia il tuo!
     </div>
+    <QrCode />
   </div>
 </template>
 
