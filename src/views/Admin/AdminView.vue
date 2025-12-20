@@ -10,6 +10,8 @@
           Esci
         </button>
       </div>
+
+      <router-link to="admin/settings">Impostazioni</router-link>
       <div class="text-sm font-medium text-center text-body border-b border-default">
         <ul class="flex justify-around flex-wrap -mb-px">
           <li class="w-1/2">

@@ -25,6 +25,13 @@ const router = createRouter({
       meta: { requiresRole: 'Admin' as UserRole },
     },
     {
+      path: '/admin/settings',
+      name: 'admin/settings',
+      component: () => import('@/views/Admin/SettingsView.vue'),
+      // METADATI: Richiede il ruolo 'Admin' per l'accesso
+      meta: { requiresRole: 'Admin' as UserRole },
+    },
+    {
       path: '/demo',
       name: 'demo',
       component: () => import('@/views/Admin/DemoView.vue'),
