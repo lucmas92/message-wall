@@ -80,12 +80,7 @@
             <li
               v-for="message in moderatedMessages"
               :key="message.id"
-              :class="[
-                'p-3 rounded-lg flex justify-between items-center transition duration-100',
-                message.status === 'approved'
-                  ? 'bg-green-50 border-l-4 border-green-500 hover:bg-green-100'
-                  : 'bg-red-50 border-l-4 border-red-500 hover:bg-red-100',
-              ]"
+              class="p-3 rounded-lg flex justify-between items-center transition duration-100"
             >
               <MessageComponent :message="message" @updateStatus="updateStatus" />
             </li>
@@ -107,10 +102,15 @@ const router = useRouter()
 
 // --- STATO REATTIVO ---
 const allMessages = ref<Message[]>([])
-const updateStatusMap = ref(new Map<string, '...' | 'pending' | 'approved' | 'rejected'>())
+const updateStatusMap = ref(
+  new Map<string, '...' | 'pending' | 'approved' | 'rejected' | 'expired'>(),
+)
 const isLoading = ref(true) // Stato di caricamento iniziale/polling
 const searchTerm = ref('')
 const selectedTab = ref<'pending' | 'moderated'>('pending')
+
+// Numero massimo di messaggi approvati/visualizzabili
+const MAX_DISPLAY_MESSAGES = 6
 
 // --- LOGICA POLLING ---
 const POLLING_RATE = 10000 // Aggiorna ogni 10 secondi
@@ -178,6 +178,18 @@ function stopPolling() {
  * Aggiorna lo stato del messaggio e ricarica i dati.
  */
 async function updateStatus(id: string, newStatus: Message['status']) {
+  // Se si tenta di approvare, verifica il limite massimo
+  if (newStatus === 'approved') {
+    const approvedCount = allMessages.value.filter((m) => m.status === 'approved').length
+    if (approvedCount >= MAX_DISPLAY_MESSAGES) {
+      // Blocca l'approvazione e avvisa l'admin
+      window.alert(
+        `Impossibile approvare: è già stato raggiunto il numero massimo di messaggi approvati (${MAX_DISPLAY_MESSAGES}).`,
+      )
+      return
+    }
+  }
+
   // Setta lo stato per mostrare il loading sul pulsante
   updateStatusMap.value.set(id, '...')
 

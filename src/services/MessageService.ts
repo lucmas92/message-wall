@@ -9,7 +9,7 @@ import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 export interface Message {
   id: string // Opzionale per l'inserimento
   text: string
-  status: 'pending' | 'approved' | 'rejected' | '...'
+  status: 'pending' | 'approved' | 'rejected' | 'expired' | '...'
   created_at: number | Date
   display_until?: number | Date
 }

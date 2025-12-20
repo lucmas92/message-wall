@@ -89,6 +89,25 @@ function normalizeMessage(message: Message): Message {
 }
 
 /**
+ * Marca in backend (Supabase) una lista di messaggi come 'expired'.
+ * Esegue richieste in parallelo e logga eventuali errori.
+ */
+async function markMessagesExpired(ids: string[]) {
+  if (!ids || ids.length === 0) return
+  try {
+    await Promise.allSettled(
+      ids.map((id) =>
+        messageService.updateMessageStatus(id, 'expired').catch((err: any) => {
+          console.error(`Errore nell'aggiornamento a expired per ${id}:`, err)
+        }),
+      ),
+    )
+  } catch (error) {
+    console.error('Errore generale durante markMessagesExpired:', error)
+  }
+}
+
+/**
  * Aggiorna tutti i timer e rimuove i messaggi scaduti localmente.
  */
 function updateAllTimers() {
@@ -116,6 +135,9 @@ function updateAllTimers() {
 
   // Rimuovi i messaggi scaduti dalla lista reattiva per aggiornare il DOM
   if (messagesToRemove.length > 0) {
+    // Chiamata al backend per marcare i messaggi come 'expired' (fire-and-forget)
+    void markMessagesExpired(messagesToRemove)
+
     approvedMessages.value = approvedMessages.value.filter((m) => !messagesToRemove.includes(m.id))
   }
 
@@ -205,47 +227,70 @@ onUnmounted(() => {
     unsubscribeFromRealtime() // Disconnessione WebSocket
   }
 })
+
+// Aggiunta: testo breve esplicativo e dimensione QR per l'overlay
+const inviteText = ref('Scansiona il QR per inviare il tuo messaggio — sarà mostrato sul mega schermo!')
+const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4">
+  <div class="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4 relative">
+    <!-- Loader e stato iniziale -->
     <div v-if="isLoading" class="text-white text-xl animate-pulse">Caricamento bacheca live...</div>
 
-    <div v-else-if="approvedMessages.length > 0" class="w-full max-w-7xl flex-grow">
-      <transition-group
-        name="message-flow"
-        tag="div"
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
-      >
-        <div
-          v-for="message in approvedMessages"
-          :key="message.id"
-          :class="[
-            'message-card p-6 rounded-xl shadow-2xl transition duration-500 text-white transform hover:scale-[1.01]',
-            getCardClass(message.id),
-          ]"
+    <!-- Area messaggi: resa scrollabile e con padding-bottom per non essere coperta dall'overlay -->
+    <div v-else class="w-full max-w-7xl flex-grow overflow-y-auto content-with-qr">
+      <div v-if="approvedMessages.length > 0" class="w-full">
+        <transition-group
+          name="message-flow"
+          tag="div"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
         >
-          <p class="text-xl sm:text-2xl font-bold leading-snug whitespace-pre-wrap">
-            {{ message.text }}
-          </p>
-
           <div
-            class="mt-4 pt-2 border-t border-opacity-30 border-white flex justify-between items-center text-sm font-semibold"
+            v-for="message in approvedMessages"
+            :key="message.id"
+            :class="[
+              'message-card p-6 rounded-xl shadow-2xl transition duration-500 text-white transform hover:scale-[1.01]',
+              getCardClass(message.id),
+            ]"
           >
-            <span class="text-yellow-300 bg-gray-800 py-1 px-3 rounded-full shadow-lg">
-              ⏳ {{ timeRemainingMap.get(message.id) || '00:00' }}
-            </span>
+            <p class="text-xl sm:text-2xl font-bold leading-snug whitespace-pre-wrap">
+              {{ message.text }}
+            </p>
 
-            <span class="text-xs opacity-70 text-white">ID: {{ message.id.slice(-4) }}</span>
+            <div
+              class="mt-4 pt-2 border-t border-opacity-30 border-white flex justify-between items-center text-sm font-semibold"
+            >
+              <span class="text-yellow-300 bg-gray-800 py-1 px-3 rounded-full shadow-lg">
+                ⏳ {{ timeRemainingMap.get(message.id) || '00:00' }}
+              </span>
+
+              <span class="text-xs opacity-70 text-white">ID: {{ message.id.slice(-4) }}</span>
+            </div>
           </div>
-        </div>
-      </transition-group>
+        </transition-group>
+      </div>
+
+      <div v-else class="text-center text-gray-500 text-2xl p-8">
+        Nessun messaggio approvato in coda. Invia il tuo!
+      </div>
     </div>
 
-    <div v-else class="text-center text-gray-500 text-2xl p-8">
-      Nessun messaggio approvato in coda. Invia il tuo!
+    <!-- Overlay fisso: QR + testo breve (sempre visibile) -->
+    <div
+      class="qr-overlay fixed left-4 bottom-4 md:left-8 md:bottom-8 z-50 flex items-center gap-3 py-2 px-3 rounded-xl bg-black/60 backdrop-blur-sm"
+      role="region"
+      aria-label="Invia messaggio"
+    >
+      <div class="qr-box" :style="{ width: qrSize + 'px', height: qrSize + 'px' }">
+        <QrCode />
+      </div>
+      <div class="text-block max-w-xs">
+        <p class="text-white text-sm md:text-base font-semibold leading-snug">
+          {{ inviteText }}
+        </p>
+      </div>
     </div>
-    <QrCode />
   </div>
 </template>
 
@@ -265,5 +310,41 @@ onUnmounted(() => {
 /* Assicura che gli elementi vengano spostati correttamente quando altri vengono rimossi */
 .message-flow-move {
   transition: transform 0.5s ease;
+}
+
+/* Nuovi stili per l'overlay QR */
+.qr-overlay {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Assicura che l'area dei messaggi non sia coperta dall'overlay:
+   padding-bottom deve essere almeno dell'altezza dell'overlay su tutti i device */
+.content-with-qr {
+  padding-bottom: 160px; /* spazio per overlay su desktop */
+}
+
+/* Adattamenti per dispositivi più piccoli */
+@media (max-width: 640px) {
+  .qr-overlay {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 12px;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .qr-box {
+    width: 72px !important;
+    height: 72px !important;
+  }
+
+  .content-with-qr {
+    padding-bottom: 120px; /* meno spazio su mobile */
+  }
+
+  .text-block p {
+    font-size: 0.85rem;
+  }
 }
 </style>

@@ -55,13 +55,14 @@ export class SupabaseMessageService implements IMessageService {
     return (data || []).map(mapToMessage)
   }
   async updateMessageStatus(id: string, newStatus: Message['status']): Promise<void> {
+    // Modificato: includiamo anche 'expired' tra gli status validi
     interface data {
-      status: 'pending' | 'approved' | 'rejected' | '...'
+      status: 'pending' | 'approved' | 'rejected' | 'expired' | '...'
       display_until?: number | string | null
     }
 
     const updateData: data = {
-      status: newStatus,
+      status: newStatus as any,
       display_until: null, // Pulisce la scadenza di default
     }
 
