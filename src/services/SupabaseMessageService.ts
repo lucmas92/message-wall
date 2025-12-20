@@ -13,6 +13,7 @@ const mapToMessage = (data: Message): Message => ({
   status: data.status,
   id: data.id.toString(),
   display_until: data.display_until,
+  created_at: data.created_at,
 })
 
 export class SupabaseMessageService implements IMessageService {

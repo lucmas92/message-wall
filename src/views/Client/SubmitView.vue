@@ -52,7 +52,7 @@
         <button
           type="submit"
           v-if="!isProfane"
-          :disabled="isSubmitting || !messageText.trim() || errorMessage"
+          :disabled="isSubmitting || !messageText.trim() || !!errorMessage"
           class="w-full py-2 rounded-xl text-lg font-bold uppercase tracking-wider transition duration-300 ease-in-out bg-indigo-600 text-white shadow-lg shadow-indigo-500/50 hover:bg-indigo-500 hover:shadow-indigo-400/70 disabled:bg-gray-600 disabled:shadow-none disabled:cursor-not-allowed"
         >
           <span v-if="isSubmitting" class="flex items-center justify-center">
@@ -107,7 +107,8 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue'
-import { messageService, profanityService } from '@/services'
+import { messageService } from '@/services'
+import { ProfanityService } from '@/services/ProfanityService.ts'
 
 const messageText = ref('')
 const isSubmitting = ref(false)
@@ -155,7 +156,7 @@ watch(
     // }
 
     // 2. Esegui il controllo del servizio
-    const hasProfanity = profanityService.check(newText)
+    const hasProfanity = ProfanityService.containsProfanity(newText)
 
     // 3. Aggiorna lo stato reattivo
     isProfane.value = hasProfanity
@@ -197,7 +198,7 @@ async function handleSubmit() {
     return
   }
 
-  if (profanityService.check(messageText.value)) {
+  if (ProfanityService.containsProfanity(messageText.value)) {
     errorMessage.value =
       'Il messaggio contiene parole non permesse. Modifica il testo per poterlo inviare.'
     // Non procedere con l'invio
@@ -228,7 +229,10 @@ async function handleSubmit() {
 }
 
 // Ciclo di vita per il polling
-onMounted(startCountPolling)
+onMounted(() => {
+  ProfanityService.init()
+  startCountPolling()
+})
 onUnmounted(stopCountPolling)
 </script>
 

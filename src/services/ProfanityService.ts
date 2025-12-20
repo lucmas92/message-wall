@@ -1,4 +1,5 @@
 // src/services/ProfanityService.ts
+import { Profanity } from '@2toad/profanity'
 
 /**
  * Lista di parole non permesse e radici.
@@ -79,50 +80,78 @@ const leetNormalize = (text: string): string => {
  * Esegue un controllo robusto che cattura anche parole separate da spazi o punteggiatura.
  */
 export class ProfanityService {
+  // Istanza singola della libreria
+  private static readonly profanity = new Profanity()
+
+  static init() {
+    this.profanity.addWords(PROFANITY_LIST)
+  }
+
   /**
    * Verifica se il testo fornito contiene parole vietate.
    * @param text Il testo da analizzare.
    * @returns True se viene trovata una parola vietata, altrimenti False.
    */
-  public check(text: string): boolean {
-    if (!text || text.trim() === '') {
-      return false
+  static containsProfanity(text: string): boolean {
+    if (!text) return false
+
+    const normalized = this.normalize(text)
+
+    // 1) Controllo con la libreria @2toad/profanity sul testo normalizzato
+    //    (dopo aver aggiunto parole italiane tramite init()) [web:76]
+    if (this.profanity.exists(normalized)) {
+      return true
     }
 
-    // Normalizzazione: minuscolo, Leet Speak
-    const normalized = leetNormalize(text.toLowerCase())
-
-    // Rimuove la punteggiatura ambigua, ma manteniamo gli spazi temporaneamente
-    const punctuationFree = normalized.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-
-    // Creazione della Stringa di Ricerca Continua (con delimitatore '#')
-    // Sostituiamo gli spazi con '#'. Rimuoviamo gli altri caratteri non alfanumerici che potrebbero essere rimasti.
-    const searchString = punctuationFree.replace(/\s+/g, '#').replace(/[^a-z0-9#]/g, '')
-
-    // Aggiungiamo un delimitatore di fine stringa per il check di parole esatte alla fine del testo
-    // Esempio: "che figa" -> "che#figa#". Questo permette a "figa#" di matchare.
-    const finalSearchString = searchString + '#'
-
-    if (finalSearchString.length === 0) {
-      return false
+    // 2) Controllo dizionario semplice custom
+    if (this.containsFromDictionary(normalized)) {
+      return true
     }
 
-    // Verifica la presenza di una corrispondenza
-    for (const profaneWord of PROFANITY_LIST) {
-      // Verifichiamo se la parola in lista è una radice (non finisce con #) o una parola esatta (finisce con #)
-      if (profaneWord.endsWith('#')) {
-        // LOGICA PRECISA: Cerca solo la parola esatta con confine di parola simulato
-        if (finalSearchString.includes(profaneWord)) {
-          return true
-        }
-      } else {
-        // LOGICA AGGRESSIVA: Cerca la radice in qualsiasi punto della stringa continua
-        if (searchString.includes(profaneWord)) {
-          return true
-        }
-      }
+    // 3) Controllo regex avanzato (varianti con numeri/simboli)
+    if (this.containsFromRegex(normalized)) {
+      return true
     }
 
     return false
+  }
+  private static normalize(text: string): string {
+    let result = text.toLowerCase()
+
+    result = result.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+
+    return leetNormalize(result)
+  }
+
+  private static containsFromDictionary(text: string): boolean {
+    const words = text.split(/[^a-zàèéìòóù]+/i).filter(Boolean)
+    const badSet = new Set(PROFANITY_LIST.map((w) => w.toLowerCase()))
+
+    for (const w of words) {
+      if (badSet.has(w)) {
+        return true
+      }
+    }
+    return false
+  }
+
+  private static readonly regexPatterns: RegExp[] = [
+    // Bestemmie principali
+    /\b[bB][e3]?[s5]?[t7]?[e3]?[m]?[m]?[i1]?[a4]?\b/gi, // bestemmia
+    /\b[pP][o0]?[o0]?[rR][cC][o0]?\b/gi, // porco
+    /\b[mM][a4][dD][rR][o0]?[nN][nN][a4]?\b/gi, // madonna
+
+    // Parolacce comuni
+    /\b[cC][a4][zZ][zZ][o0]?\b/gi, // cazzo
+    /\b[sS][tR][rR][o0][nN][zZ][o0]?\b/gi, // stronzo
+    /\b[vV][a4][fF][a4][nN][cC]([uU][lL][o0])?\b/gi, // vaffanculo
+
+    // Altro
+    /\b[dD][iI][o0]?\b/gi, // dio
+    /\b[pP][uU][tT][tT]([a4][nN][a4])?\b/gi, // puttana
+  ]
+
+  private static containsFromRegex(text: string): boolean {
+    return this.regexPatterns.some((pattern) => pattern.test(text))
   }
 }

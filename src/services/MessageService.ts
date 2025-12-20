@@ -7,9 +7,10 @@ import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
  * Usiamo 'pending' come valore di default in questo contesto.
  */
 export interface Message {
+  id: string // Opzionale per l'inserimento
   text: string
   status: 'pending' | 'approved' | 'rejected' | '...'
-  id: string // Opzionale per l'inserimento
+  created_at: number | Date
   display_until?: number | Date
 }
 export type Callback = (payload: RealtimePostgresChangesPayload<Message>) => void
