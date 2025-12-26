@@ -236,54 +236,8 @@ const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4 relative">
-    <!-- Loader e stato iniziale -->
-    <div v-if="isLoading" class="text-white text-xl animate-pulse">Caricamento bacheca live...</div>
-
-    <!-- Area messaggi: resa scrollabile e con padding-bottom per non essere coperta dall'overlay -->
-    <div v-else class="w-full max-w-7xl flex-grow overflow-y-auto content-with-qr">
-      <div v-if="approvedMessages.length > 0" class="w-full">
-        <transition-group
-          name="message-flow"
-          tag="div"
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
-        >
-          <div
-            v-for="message in approvedMessages"
-            :key="message.id"
-            :class="[
-              'message-card p-6 rounded-xl shadow-2xl transition duration-500 text-white transform hover:scale-[1.01]',
-              getCardClass(message.id),
-            ]"
-          >
-            <p class="text-xl sm:text-2xl font-bold leading-snug whitespace-pre-wrap">
-              {{ message.text }}
-            </p>
-
-            <div
-              class="mt-4 pt-2 border-t border-opacity-30 border-white flex justify-between items-center text-sm font-semibold"
-            >
-              <span class="text-yellow-300 bg-gray-800 py-1 px-3 rounded-full shadow-lg">
-                ⏳ {{ timeRemainingMap.get(message.id) || '00:00' }}
-              </span>
-
-              <span class="text-xs opacity-70 text-white">ID: {{ message.id.slice(-4) }}</span>
-            </div>
-          </div>
-        </transition-group>
-      </div>
-
-      <div v-else class="text-center text-gray-500 text-2xl p-8">
-        Nessun messaggio approvato in coda. Invia il tuo!
-      </div>
-    </div>
-
-    <!-- Overlay fisso: QR + testo breve (sempre visibile) -->
-    <div
-      class="qr-overlay fixed left-4 bottom-4 md:left-8 md:bottom-8 z-50 flex items-center gap-3 py-2 px-3 rounded-xl bg-black/60 backdrop-blur-sm"
-      role="region"
-      aria-label="Invia messaggio"
-    >
+  <div class="min-h-screen bg-gray-900 flex text-white items-center justify-center relative">
+    <div class="min-h-screen w-1/4 p-4 flex flex-col justify-end bg-gray-500">
       <div class="qr-box" :style="{ width: qrSize + 'px', height: qrSize + 'px' }">
         <QrCode />
       </div>
@@ -291,6 +245,50 @@ const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
         <p class="text-white text-sm md:text-base font-semibold leading-snug">
           {{ inviteText }}
         </p>
+      </div>
+    </div>
+    <div class="w-3/4">
+      <!-- Loader e stato iniziale -->
+      <div v-if="isLoading" class="text-white text-xl animate-pulse">
+        Caricamento bacheca live...
+      </div>
+
+      <!-- Area messaggi: resa scrollabile e con padding-bottom per non essere coperta dall'overlay -->
+      <div v-else class="w-full overflow-y-auto content-with-qr">
+        <div v-if="approvedMessages.length > 0" class="w-full">
+          <transition-group
+            name="message-flow"
+            tag="div"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
+          >
+            <div
+              v-for="message in approvedMessages"
+              :key="message.id"
+              :class="[
+                'message-card p-6 rounded-xl shadow-2xl transition duration-500 text-white transform hover:scale-[1.01]',
+                getCardClass(message.id),
+              ]"
+            >
+              <p class="text-xl sm:text-2xl font-bold leading-snug whitespace-pre-wrap">
+                {{ message.text }}
+              </p>
+
+              <div
+                class="mt-4 pt-2 border-t border-opacity-30 border-white flex justify-between items-center text-sm font-semibold"
+              >
+                <span class="text-yellow-300 bg-gray-800 py-1 px-3 rounded-full shadow-lg">
+                  ⏳ {{ timeRemainingMap.get(message.id) || '00:00' }}
+                </span>
+
+                <span class="text-xs opacity-70 text-white">ID: {{ message.id.slice(-4) }}</span>
+              </div>
+            </div>
+          </transition-group>
+        </div>
+
+        <div v-else class="text-center text-gray-500 text-2xl p-8">
+          Nessun messaggio approvato in coda. Invia il tuo!
+        </div>
       </div>
     </div>
   </div>
