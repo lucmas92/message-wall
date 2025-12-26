@@ -237,14 +237,25 @@ const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
 
 <template>
   <div class="min-h-screen bg-gray-900 flex text-white items-center justify-center relative">
-    <div class="min-h-screen w-1/4 p-4 flex flex-col justify-end bg-gray-500">
-      <div class="qr-box" :style="{ width: qrSize + 'px', height: qrSize + 'px' }">
-        <QrCode />
-      </div>
-      <div class="text-block max-w-xs">
-        <p class="text-white text-sm md:text-base font-semibold leading-snug">
-          {{ inviteText }}
+    <div class="min-h-screen w-1/4 p-4 flex flex-col justify-between bg-gray-500">
+      <div class="border-b">
+        <h4 class="text-3xl text-center my-2">CONDIVIDI IL MOMENTO ✨</h4>
+        <p class="p-4 text-gray-200">
+          Usa questo spazio per fare auguri, salutare gli amici o condividere un'emozione della
+          serata. <br />Scansiona e scrivi ora!<br />
+          Sii gentile, la bacheca è di tutti.
         </p>
+      </div>
+
+      <div>
+        <div class="qr-box" :style="{ width: qrSize + 'px', height: qrSize + 'px' }">
+          <QrCode />
+        </div>
+        <div class="text-block max-w-xs">
+          <p class="text-white text-sm md:text-base font-semibold leading-snug">
+            {{ inviteText }}
+          </p>
+        </div>
       </div>
     </div>
     <div class="w-3/4">
@@ -253,34 +264,22 @@ const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
         Caricamento bacheca live...
       </div>
 
-      <!-- Area messaggi: resa scrollabile e con padding-bottom per non essere coperta dall'overlay -->
-      <div v-else class="w-full overflow-y-auto content-with-qr">
+      <div v-else class="w-full max-h-screen p-4 overflow-y-auto break-all content-with-qr">
         <div v-if="approvedMessages.length > 0" class="w-full">
           <transition-group
             name="message-flow"
             tag="div"
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
+            class="columns-1 sm:columns-2 lg:columns-3 gap-4"
           >
             <div
               v-for="message in approvedMessages"
               :key="message.id"
-              :class="[
-                'message-card p-6 rounded-xl shadow-2xl transition duration-500 text-white transform hover:scale-[1.01]',
-                getCardClass(message.id),
-              ]"
+              :class="['break-inside-avoid mb-4 group relative', getCardClass(message.id)]"
             >
-              <p class="text-xl sm:text-2xl font-bold leading-snug whitespace-pre-wrap">
-                {{ message.text }}
-              </p>
-
-              <div
-                class="mt-4 pt-2 border-t border-opacity-30 border-white flex justify-between items-center text-sm font-semibold"
-              >
-                <span class="text-yellow-300 bg-gray-800 py-1 px-3 rounded-full shadow-lg">
-                  ⏳ {{ timeRemainingMap.get(message.id) || '00:00' }}
-                </span>
-
-                <span class="text-xs opacity-70 text-white">ID: {{ message.id.slice(-4) }}</span>
+              <div class="p-4 rounded-2xl transition-colors duration-200">
+                <p class="text-xl sm:text-2xl font-bold leading-relaxed whitespace-pre-wrap">
+                  {{ message.text }}
+                </p>
               </div>
             </div>
           </transition-group>
