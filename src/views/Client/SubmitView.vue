@@ -245,7 +245,7 @@ onMounted(async () => {
     isLoading.value = false
     MAX_CHARS = getSettingValue('max_message_length', '500') as unknown as number
     MAX_LINES = getSettingValue('max_lines', '5') as unknown as number
-    isActive.value = getSettingValue('is_active','false')
+    isActive.value = (getSettingValue('is_active', 'false') as unknown as string) === 'true'
   })
   ProfanityService.init()
   startCountPolling()

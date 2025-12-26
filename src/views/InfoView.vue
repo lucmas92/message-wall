@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-6 sm:p-10 flex flex-col items-center">
-    <div class="w-full max-w-2xl bg-white shadow-xl rounded-lg p-8 mt-10 text-gray-800">
+  <div class="min-h-screen bg-gray-50 p-2 sm:p-10 flex flex-col items-center">
+    <div class="w-full max-w-2xl bg-white shadow-xl rounded-lg p-8 mt-2text-gray-800">
       <h1 class="text-4xl font-extrabold text-indigo-700 text-center mb-4">
         Info & Istruzioni per la Bacheca Live
       </h1>
@@ -25,7 +25,6 @@
             <span class="mr-3 text-red-500">❌</span> Regole del Contenuto
           </h2>
           <ul class="list-disc list-inside text-gray-600 space-y-1 ml-4">
-            <li>Massimo 250 caratteri.</li>
             <li>È severamente vietato l'uso di parolacce, bestemmie o contenuti offensivi.</li>
             <li>Messaggi promozionali non autorizzati verranno rifiutati.</li>
           </ul>

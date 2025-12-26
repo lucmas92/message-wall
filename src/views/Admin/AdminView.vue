@@ -52,17 +52,17 @@
         </ul>
       </section>
 
-      <section v-if="selectedTab == 'moderated'" class="py-4">
-        <div class="p-4 bg-white rounded-lg shadow-sm text-center text-gray-500">
+      <section v-if="selectedTab == 'moderated'" class="py-0">
+        <div class="py-2 text-center text-gray-500">
           <input
             type="text"
             v-model="searchTerm"
-            placeholder="Cerca per testo o ID (ultime 4 cifre)..."
-            class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Cerca per testo..."
+            class="w-full bg-white p-2 border border-gray-300 rounded-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
-        <div class="overflow-y-auto my-4 no-scrollbar space-y-6" style="max-height: 400px">
+        <div class="overflow-y-auto my-2 no-scrollbar space-y-2" style="max-height: 600px">
           <div v-if="moderatedMessages.length === 0" class="p-4 text-center text-gray-500">
             Nessun messaggio trovato con la parola chiave "{{ searchTerm }}".
           </div>
@@ -95,7 +95,7 @@ const updateStatusMap = ref(
 )
 const isLoading = ref(true) // Stato di caricamento iniziale/polling
 const searchTerm = ref('')
-const selectedTab = ref<'pending' | 'moderated'>('moderated')
+const selectedTab = ref<'pending' | 'moderated'>('pending')
 
 // Numero massimo di messaggi approvati/visualizzabili
 const MAX_DISPLAY_MESSAGES = 6
