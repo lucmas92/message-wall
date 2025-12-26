@@ -229,9 +229,7 @@ onUnmounted(() => {
 })
 
 // Aggiunta: testo breve esplicativo e dimensione QR per l'overlay
-const inviteText = ref(
-  'Scansiona il QR per inviare il tuo messaggio — sarà mostrato sul mega schermo!',
-)
+const inviteText = ref('Scansiona il QR per inviare il tuo messaggio!')
 const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
 </script>
 
@@ -285,8 +283,9 @@ const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
           </transition-group>
         </div>
 
-        <div v-else class="text-center text-gray-500 text-2xl p-8">
-          Nessun messaggio approvato in coda. Invia il tuo!
+        <div v-else class="text-center text-gray-500/80 animate-pulse text-3xl p-8">
+          Lo schermo è pronto, mancano solo le tue idee.<br />Scansiona il codice e condividi il tuo
+          messaggio con tutti noi.
         </div>
       </div>
     </div>

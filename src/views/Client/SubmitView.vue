@@ -1,111 +1,115 @@
 <template>
-  <div class="min-h-screen bg-gray-900 flex flex-col items-center justify-start p-4">
-    <h2
-      class="text-3xl my-8 font-extrabold text-white text-center drop-shadow-lg"
-      style="
-        text-shadow:
-          0 0 10px #6366f1,
-          0 0 20px #4f46e5;
-      "
-    >
-      Proietta il tuo messaggio
-    </h2>
-    <div v-if="!isActive" class="text-white p-6 animate-pulse">
-      Momentaneamente non stiamo accettando nuovi messaggi. Torna più tardi!
-    </div>
-    <div
-      v-if="!isLoading && isActive"
-      class="w-full max-w-xl bg-gray-800 border border-indigo-900 shadow-2xl rounded-2xl p-6 sm:p-10 transform transition-all duration-500 hover:shadow-indigo-700/50"
-    >
-      <div
-        v-if="pendingCount !== null"
-        class="text-center text-xs mb-6 py-2 px-4 rounded-full"
-        :class="{
-          'bg-yellow-800 text-yellow-300': pendingCount > 0,
-          'bg-gray-700 text-gray-400': pendingCount === 0,
-        }"
+  <div class="min-h-screen bg-[#050510] flex flex-col items-center justify-start p-4">
+    <!-- Intestazione -->
+    <div class="text-center mb-10">
+      <span
+        class="inline-block px-4 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-[10px] font-bold uppercase tracking-[0.3em] mb-4"
       >
-        <span class="font-bold">Coda di moderazione:</span>
-        <span v-if="pendingCount > 0" class="ml-1 animate-pulse"
-          >{{ pendingCount }} messaggi in attesa</span
-        >
-        <span v-else class="ml-1">Coda vuota! 🟢</span>
-      </div>
+        Exclusive Event
+      </span>
+      <h1
+        class="font-serif text-2xl text-transparent bg-clip-text bg-gradient-to-b from-yellow-100 via-yellow-400 to-yellow-600 leading-tight"
+      >
+        Brindisi Digitale
+      </h1>
+      <p class="text-white/40 text-sm mt-3 font-light tracking-wide">
+        Invia il tuo augurio per il 2025 sullo schermo
+      </p>
+    </div>
 
-      <form @submit.prevent="handleSubmit">
-        <textarea
-          v-model="messageText"
-          :disabled="isSubmitting"
-          placeholder="Digita qui il tuo pensiero..."
-          :maxlength="MAX_CHARS"
-          @input="handleInput"
-          rows="3"
-          class="w-full p-4 border-2 rounded-xl bg-gray-700 text-white text-lg transition duration-300 ease-in-out resize-none border-indigo-600 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/50 shadow-inner shadow-gray-900/50 disabled:opacity-60 disabled:cursor-not-allowed"
-        ></textarea>
+    <div class="relative group md:w-1/2 max-w-md">
+      <!-- Bordo Neon Dorato -->
+      <div
+        class="absolute -inset-[1px] bg-gradient-to-b from-yellow-500/50 via-transparent to-yellow-500/50 rounded-[2.5rem] opacity-30"
+      ></div>
 
-        <div class="flex justify-between items-center mt-3 mb-6">
-          <div
-            class="text-sm font-medium"
-            :class="messageText.length > 220 ? 'text-red-400' : 'text-indigo-400'"
-          >
-            {{ MAX_CHARS - messageText.length }} caratteri rimanenti
+      <div
+        class="relative bg-black/40 backdrop-blur-2xl rounded-[2.5rem] p-5 shadow-2xl border border-white/5"
+      >
+        <form @submit.prevent="handleSubmit" class="space-y-8">
+          <!-- Messaggio -->
+          <div class="space-y-3">
+            <label class="flex justify-between items-end px-1">
+              <span class="text-[10px] font-bold text-yellow-500/60 uppercase tracking-widest"
+                >Il tuo Pensiero</span
+              >
+              <span class="text-[9px] text-white/30 font-medium tracking-tighter"
+                >MAX {{ MAX_CHARS }} CARATTERI</span
+              >
+            </label>
+            <div class="relative group/field">
+              <textarea
+                class="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-white placeholder-white/10 focus:outline-none focus:border-yellow-500/40 transition-all resize-none text-lg leading-relaxed shadow-inner"
+                rows="4"
+                v-model="messageText"
+                :disabled="isSubmitting"
+                :maxlength="MAX_CHARS"
+                @input="handleInput"
+                placeholder="Cosa succederà a mezzanotte?"
+              ></textarea>
+              <div
+                class="absolute bottom-4 right-4 text-xl opacity-20 group-focus-within/field:opacity-50 transition-opacity"
+              >
+                ✨
+              </div>
+            </div>
           </div>
-          <small class="text-xs text-gray-500">Max {{ MAX_CHARS }} caratteri</small>
-        </div>
 
-        <button
-          type="submit"
-          v-if="!isProfane"
-          :disabled="isSubmitting || !messageText.trim() || !!errorMessage"
-          class="w-full py-2 rounded-xl text-lg font-bold uppercase tracking-wider transition duration-300 ease-in-out bg-indigo-600 text-white shadow-lg shadow-indigo-500/50 hover:bg-indigo-500 hover:shadow-indigo-400/70 disabled:bg-gray-600 disabled:shadow-none disabled:cursor-not-allowed"
-        >
-          <span v-if="isSubmitting" class="flex items-center justify-center">
-            <svg
-              class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
+          <!-- Bottone Invio -->
+          <div>
+            <button
+              :disabled="!isActive || isSubmitting"
+              type="submit"
+              :class="[
+                !isActive || isSubmitting
+                  ? 'cursor-not-allowed opacity-50'
+                  : 'hover:scale-[1.02] active:scale-95 animate-pulse',
+              ]"
+              class="relative w-full group/btn overflow-hidden rounded-[1.5rem] p-[2px] transition-transform active:scale-95"
             >
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-              ></circle>
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            Invio in corso...
-          </span>
-          <span v-else> INVIA E METTI IN CODA </span>
-        </button>
-      </form>
-      <div class="mt-6 text-center">
-        <router-link
-          :to="{ name: 'info' }"
-          class="text-sm text-indigo-400 hover:text-indigo-300 transition duration-150 border-b border-indigo-400 border-opacity-50"
+              <!-- Shimmer Effect -->
+              <div
+                class="absolute inset-0 bg-gradient-to-r from-yellow-700 via-yellow-200 to-yellow-700 animate-shimmer"
+              ></div>
+
+              <div
+                class="relative bg-transparent transition-colors duration-500 py-2 rounded-[1.4rem] flex items-center justify-center gap-3"
+              >
+                <span class="text-black font-extrabold text-lg tracking-tighter transition-colors">
+                  PUBBLICA ORA
+                </span>
+              </div>
+            </button>
+          </div>
+        </form>
+
+        <!-- Footer Card -->
+        <div
+          class="mt-8 pt-6 border-t border-white/5 flex flex-col items-center justify-center gap-4"
         >
-          Hai bisogno di aiuto o vuoi conoscere le regole? Clicca qui.
-        </router-link>
-      </div>
-      <div
-        v-if="successMessage"
-        class="mt-8 p-5 rounded-xl bg-green-900/50 text-green-300 border border-green-600 font-medium shadow-xl"
-      >
-        ✅ {{ successMessage }}
-      </div>
-      <div
-        v-if="errorMessage"
-        class="mt-8 p-5 rounded-xl bg-red-900/50 text-red-300 border border-red-600 font-medium shadow-xl"
-      >
-        ❌ Errore: {{ errorMessage }}
+          <div class="flex items-center gap-2">
+            <span
+              class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"
+              :class="isActive ? 'bg-green-500' : 'bg-red-500'"
+            ></span>
+            <span class="text-[9px] text-white/40 font-bold uppercase tracking-wider"
+              >Live System {{ isActive ? 'Active' : 'Inactive' }}</span
+            >
+          </div>
+
+          <router-link
+            :to="{ name: 'info' }"
+            class="text-[10px] text-white/60 hover:text-indigo-300 text-center"
+          >
+            Hai bisogno di aiuto o vuoi conoscere le regole? Clicca qui.
+          </router-link>
+        </div>
       </div>
     </div>
+
+    <p class="text-center mt-10 text-white/20 text-[10px] font-medium tracking-[0.2em] uppercase">
+      Capodanno 2025 • Modera responsabilmente
+    </p>
   </div>
 </template>
 
@@ -113,19 +117,17 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { messageService } from '@/services'
 import { ProfanityService } from '@/services/ProfanityService.ts'
-import { type Setting, SupabaseSettingsService } from '@/services/SupabaseSettingsService.ts'
+import { SupabaseSettingsService } from '@/services/SupabaseSettingsService.ts'
 
 const settingsService = new SupabaseSettingsService()
 const messageText = ref('')
-const isLoading = ref(true)
 const isActive = ref(false)
 const isSubmitting = ref(false)
 const successMessage = ref<string | null>(null)
 const errorMessage = ref<string | null>(null)
-const settings = ref<Setting[]>([])
 
-let MAX_CHARS = getSettingValue('max_message_length', '500') as unknown as number
-let MAX_LINES = getSettingValue('max_lines', '5') as unknown as number
+let MAX_CHARS = 500
+let MAX_LINES = 5
 
 const pendingCount = ref<number | null>(null) // Stato per il contatore
 const COUNT_POLLING_RATE = 20000 // Aggiorna ogni 20 secondi
@@ -194,12 +196,14 @@ function stopCountPolling() {
   }
 }
 
-function getSettingValue(key: string, defaultValue: string): string {
-  const setting = settings.value.find((s) => s.key === key)
-  return setting ? setting.value : defaultValue
-}
-
 async function handleSubmit() {
+  isActive.value = (await settingsService.fetchSetting('is_active', 'false')) as boolean
+
+  if (!isActive.value) {
+    errorMessage.value = 'Il sistema non è attivo al momento. Riprova più tardi.'
+    return
+  }
+
   if (!messageText.value.trim()) {
     errorMessage.value = 'Il messaggio non può essere vuoto.'
     return
@@ -235,18 +239,12 @@ async function handleSubmit() {
   }
 }
 
-async function fetchSettings() {
-  settings.value = await settingsService.fetchSettings()
-}
-
 // Ciclo di vita per il polling
 onMounted(async () => {
-  fetchSettings().then(() => {
-    isLoading.value = false
-    MAX_CHARS = getSettingValue('max_message_length', '500') as unknown as number
-    MAX_LINES = getSettingValue('max_lines', '5') as unknown as number
-    isActive.value = getSettingValue('is_active', 'false') as unknown as boolean
-  })
+  MAX_CHARS = (await settingsService.fetchSetting('max_message_length', '500')) as number
+  MAX_LINES = (await settingsService.fetchSetting('max_lines', '5')) as number
+  isActive.value = (await settingsService.fetchSetting('is_active', 'false')) as boolean
+
   ProfanityService.init()
   startCountPolling()
 })

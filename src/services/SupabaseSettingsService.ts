@@ -24,6 +24,21 @@ export class SupabaseSettingsService {
 
     return data
   }
+  async fetchSetting(key: string, defaultValue: string) {
+    const { data, error } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', key)
+      .order('id', { ascending: false })
+      .single()
+
+    if (error) {
+      console.error('Errore Supabase nel fetch settings:', error.message)
+      return []
+    }
+
+    return data ? data.value : defaultValue
+  }
 
   async updateSetting(key: string, newValue: any) {
     if (!supabase) return

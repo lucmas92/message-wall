@@ -98,7 +98,7 @@ const searchTerm = ref('')
 const selectedTab = ref<'pending' | 'moderated'>('pending')
 
 // Numero massimo di messaggi approvati/visualizzabili
-const MAX_DISPLAY_MESSAGES = 6
+const MAX_DISPLAY_MESSAGES = 60
 
 // --- LOGICA POLLING ---
 const POLLING_RATE = 10000 // Aggiorna ogni 10 secondi
