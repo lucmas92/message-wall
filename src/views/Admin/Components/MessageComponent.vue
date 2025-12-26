@@ -25,7 +25,7 @@ const messageStatus = computed(() => {
 // Classe CSS dinamica in base allo stato del messaggio per testo e sfondo
 const messageClass = computed(() => {
   const baseClass = 'p-4 rounded shadow-sm '
-
+  0
   switch (props.message.status) {
     case 'approved':
       return baseClass + 'bg-green-50 border border-green-200'
@@ -36,12 +36,11 @@ const messageClass = computed(() => {
     case 'pending':
     case '...':
     default:
-      return baseClass + 'bg-yellow-50 border border-yellow-200'
+      return baseClass + 'bg-yellow-50'
   }
 })
 
 const formatDate = (date: number | Date) => {
-  console.log('formatDate', typeof date)
   const d = new Date(date)
   return d.toLocaleString()
 }
@@ -52,34 +51,35 @@ const updateStatusEmit = (messageId: string, status: 'approved' | 'rejected') =>
 }
 </script>
 <template>
-  <div :class="messageClass" class="message-content mb-3 sm:mb-0 w-full flex justify-between">
+  <div
+    :class="messageClass"
+    class="message-content mb-3 sm:mb-0 w-full flex flex-col lg:flex-row gap-x-1 justify-between"
+  >
     <div>
-
-    <p class="text-gray-900 font-medium text-base whitespace-pre-wrap">
-      {{ message.text }}
-    </p>
-    <small class="text-gray-400 text-xs">
-      {{ formatDate(message.created_at!) }}<br />
-      ID: {{ message.id.slice(-4) }}</small
-    >
-
+      <p class="text-gray-900 font-medium text-base whitespace-pre-wrap">
+        {{ message.text }}
+      </p>
+      <small class="text-gray-400 text-xs">
+        {{ formatDate(message.created_at!) }}<br />
+        ID: {{ message.id.slice(-4) }}</small
+      >
     </div>
     <div class="flex space-x-2 w-full sm:w-auto" v-if="['pending', '...'].includes(message.status)">
       <button
         @click="updateStatusEmit(message.id, 'approved')"
         :disabled="message.status === '...'"
-        class="flex-1 min-w-32 py-2 rounded font-semibold text-white transition disabled:opacity-50 bg-green-500 hover:bg-green-600"
+        class="flex-1 min-w-32 py-1 rounded font-semibold text-white transition disabled:opacity-50 bg-green-500 hover:bg-green-600"
       >
         <span v-if="message.status === '...'">...</span>
-        <span v-else>✅ Approva</span>
+        <span v-else>Approva</span>
       </button>
       <button
         @click="updateStatusEmit(message.id, 'rejected')"
         :disabled="message.status === '...'"
-        class="flex-1 min-w-32 py-2 rounded font-semibold text-white transition disabled:opacity-50 bg-red-500 hover:bg-red-600"
+        class="flex-1 min-w-32 py-1 rounded font-semibold text-white transition disabled:opacity-50 bg-red-500 hover:bg-red-600"
       >
         <span v-if="message.status === '...'">...</span>
-        <span v-else>❌ Rifiuta</span>
+        <span v-else>Rifiuta</span>
       </button>
     </div>
     <div v-else>

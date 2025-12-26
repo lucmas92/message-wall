@@ -90,7 +90,7 @@ async function handleLogin() {
     if (role) {
       // Login riuscito: reindirizza in base al ruolo
       if (role === 'Admin') {
-        await router.push({ name: 'admin' })
+        await router.push({ name: 'AdminDashboard' })
       } else if (role === 'Screen') {
         await router.push({ name: 'screen' })
       } else {

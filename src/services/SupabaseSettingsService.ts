@@ -14,7 +14,7 @@ export class SupabaseSettingsService {
   async fetchSettings() {
     const { data, error } = await supabase
       .from('settings')
-      .select('key, value')
+      .select('key, value, description')
       .order('id', { ascending: false })
 
     if (error) {

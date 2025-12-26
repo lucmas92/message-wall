@@ -1,17 +1,6 @@
 <template>
-  <div class="min-h-screen bg-gray-100 p-4 sm:p-6">
+  <div class="bg-gray-100 p-4 sm:p-6">
     <div class="max-w-4xl mx-auto">
-      <div class="flex justify-between items-center pb-4 mb-6 border-b border-gray-300">
-        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Pannello di Moderazione</h1>
-        <button
-          @click="handleLogout"
-          class="btn-logout bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-4 rounded transition"
-        >
-          Esci
-        </button>
-      </div>
-
-      <router-link to="admin/settings">Impostazioni</router-link>
       <div class="text-sm font-medium text-center text-body border-b border-default">
         <ul class="flex justify-around flex-wrap -mb-px">
           <li class="w-1/2">
@@ -52,11 +41,11 @@
           Nessun nuovo messaggio in attesa.
         </div>
 
-        <ul class="space-y-4" v-if="selectedTab == 'pending'">
+        <ul class="space-y-1" v-if="selectedTab == 'pending'">
           <li
             v-for="message in pendingMessages"
             :key="message.id"
-            class="bg-white p-4 rounded-lg shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center border-l-8 border-yellow-400"
+            class="p-1 rounded-lg flex justify-between items-center transition duration-100"
           >
             <MessageComponent :message="message" @updateStatus="updateStatus" />
           </li>
@@ -73,16 +62,16 @@
           />
         </div>
 
-        <div class="overflow-y-auto my-4 no-scrollbar space-y-4" style="max-height: 400px">
+        <div class="overflow-y-auto my-4 no-scrollbar space-y-6" style="max-height: 400px">
           <div v-if="moderatedMessages.length === 0" class="p-4 text-center text-gray-500">
             Nessun messaggio trovato con la parola chiave "{{ searchTerm }}".
           </div>
 
-          <ul class="space-y-2 text-sm p-4 pt-0">
+          <ul class="space-y-1 text-sm p-1 pt-0">
             <li
               v-for="message in moderatedMessages"
               :key="message.id"
-              class="p-3 rounded-lg flex justify-between items-center transition duration-100"
+              class="p-1 rounded-lg flex justify-between items-center transition duration-100"
             >
               <MessageComponent :message="message" @updateStatus="updateStatus" />
             </li>
@@ -95,12 +84,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue' // Assicurati che 'computed' sia importato
-import { messageService, authService } from '@/services'
-import { useRouter } from 'vue-router'
+import { messageService } from '@/services'
 import type { Message } from '@/services/MessageService'
 import MessageComponent from '@/views/Admin/Components/MessageComponent.vue'
-
-const router = useRouter()
 
 // --- STATO REATTIVO ---
 const allMessages = ref<Message[]>([])
@@ -109,7 +95,7 @@ const updateStatusMap = ref(
 )
 const isLoading = ref(true) // Stato di caricamento iniziale/polling
 const searchTerm = ref('')
-const selectedTab = ref<'pending' | 'moderated'>('pending')
+const selectedTab = ref<'pending' | 'moderated'>('moderated')
 
 // Numero massimo di messaggi approvati/visualizzabili
 const MAX_DISPLAY_MESSAGES = 6
@@ -206,15 +192,6 @@ async function updateStatus(id: string, newStatus: Message['status']) {
     // Rimuove lo stato di loading
     updateStatusMap.value.delete(id)
   }
-}
-
-/**
- * Gestisce l'uscita dell'utente.
- */
-function handleLogout() {
-  stopPolling() // Interrompi il polling prima di uscire
-  authService.logout()
-  router.push({ name: 'login' })
 }
 
 // --- CICLO DI VITA DEL COMPONENTE ---

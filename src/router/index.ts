@@ -17,26 +17,23 @@ const router = createRouter({
       name: 'login',
       component: LoginView,
     },
+
     {
       path: '/admin',
-      name: 'admin',
-      component: () => import('@/views/Admin/AdminView.vue'),
-      // METADATI: Richiede il ruolo 'Admin' per l'accesso
       meta: { requiresRole: 'Admin' as UserRole },
-    },
-    {
-      path: '/admin/settings',
-      name: 'admin/settings',
-      component: () => import('@/views/Admin/SettingsView.vue'),
-      // METADATI: Richiede il ruolo 'Admin' per l'accesso
-      meta: { requiresRole: 'Admin' as UserRole },
-    },
-    {
-      path: '/demo',
-      name: 'demo',
-      component: () => import('@/views/Admin/DemoView.vue'),
-      // METADATI: Richiede il ruolo 'Admin' per l'accesso
-      meta: { requiresRole: 'Admin' as UserRole },
+      component: () => import('../views/Admin/layout/AdminLayout.vue'), // Il tuo guscio
+      children: [
+        {
+          path: '', // Corrisponde a /admin
+          name: 'AdminDashboard',
+          component: () => import('../views/Admin/AdminView.vue'),
+        },
+        {
+          path: 'settings', // Corrisponde a /admin
+          name: 'AdminSettings',
+          component: () => import('../views/Admin/SettingsView.vue'),
+        },
+      ],
     },
     {
       path: '/info',

@@ -229,7 +229,9 @@ onUnmounted(() => {
 })
 
 // Aggiunta: testo breve esplicativo e dimensione QR per l'overlay
-const inviteText = ref('Scansiona il QR per inviare il tuo messaggio — sarà mostrato sul mega schermo!')
+const inviteText = ref(
+  'Scansiona il QR per inviare il tuo messaggio — sarà mostrato sul mega schermo!',
+)
 const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
 </script>
 
@@ -314,8 +316,8 @@ const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
 
 /* Nuovi stili per l'overlay QR */
 .qr-overlay {
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* Assicura che l'area dei messaggi non sia coperta dall'overlay:

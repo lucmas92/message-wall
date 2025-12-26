@@ -1,9 +1,9 @@
 <template>
-  <div class="min-h-screen bg-gray-100 p-4 sm:p-6">
+  <div class="px-2">
     <div
       v-for="setting in settings"
       :key="setting.id"
-      class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md"
+      class="bg-white rounded-2xl my-2 shadow-sm border border-gray-100 py-3 px-6 transition-all hover:shadow-md"
     >
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div class="flex-1">
@@ -12,7 +12,11 @@
               class="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold uppercase tracking-widest rounded-md"
               >KEY</span
             >
-            <h3 class="font-mono text-indigo-600 font-bold">{{ setting.key }}</h3>
+            <h3
+              class="inline-block text-blue-500 p-1 text-fg-brand border-b border-brand rounded-t-base active"
+            >
+              {{ setting.key }}
+            </h3>
           </div>
           <p class="text-sm text-gray-600 leading-relaxed">{{ setting.description }}</p>
         </div>
@@ -21,11 +25,29 @@
           <!-- Input Dinamico basato sul tipo di dato -->
           <div class="relative flex-1 sm:w-48">
             <input
-              v-if="typeof setting.value === 'number' || !isNaN(Number(setting.value))"
+              v-if="typeof setting.value === 'number'"
               type="number"
               v-model="setting.value"
               class="w-full pl-3 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:bg-white transition outline-none text-gray-900 font-bold"
             />
+
+            <div
+              v-else-if="typeof setting.value === 'boolean'"
+              class="relative inline-block w-11 h-5"
+            >
+              <input
+                v-model="setting.value"
+                id="switch-component"
+                type="checkbox"
+                class="peer appearance-none w-11 h-5 bg-slate-100 rounded-full checked:bg-slate-800 cursor-pointer transition-colors duration-300"
+              />
+              <label
+                for="switch-component"
+                class="absolute top-0 left-0 w-5 h-5 bg-white rounded-full border border-slate-300 shadow-sm transition-transform duration-300 peer-checked:translate-x-6 peer-checked:border-slate-800 cursor-pointer"
+              >
+              </label>
+            </div>
+
             <input
               v-else
               type="text"
