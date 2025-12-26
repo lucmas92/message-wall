@@ -10,7 +10,11 @@
     >
       Proietta il tuo messaggio
     </h2>
+    <div v-if="!isActive" class="text-white p-6 animate-pulse">
+      Momentaneamente non stiamo accettando nuovi messaggi. Torna più tardi!
+    </div>
     <div
+      v-if="!isLoading && isActive"
       class="w-full max-w-xl bg-gray-800 border border-indigo-900 shadow-2xl rounded-2xl p-6 sm:p-10 transform transition-all duration-500 hover:shadow-indigo-700/50"
     >
       <div
@@ -109,15 +113,19 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { messageService } from '@/services'
 import { ProfanityService } from '@/services/ProfanityService.ts'
+import { type Setting, SupabaseSettingsService } from '@/services/SupabaseSettingsService.ts'
 
+const settingsService = new SupabaseSettingsService()
 const messageText = ref('')
+const isLoading = ref(true)
+const isActive = ref(false)
 const isSubmitting = ref(false)
 const successMessage = ref<string | null>(null)
 const errorMessage = ref<string | null>(null)
+const settings = ref<Setting[]>([])
 
-const MAX_CHARS = 250
-
-const MAX_LINES = 5
+let MAX_CHARS = getSettingValue('max_message_length', '500') as unknown as number
+let MAX_LINES = getSettingValue('max_lines', '5') as unknown as number
 
 const pendingCount = ref<number | null>(null) // Stato per il contatore
 const COUNT_POLLING_RATE = 20000 // Aggiorna ogni 20 secondi
@@ -150,12 +158,6 @@ const handleInput = (event: Event) => {
 watch(
   messageText,
   (newText) => {
-    // if (newText.length > 0) {
-    //   successMessage.value = null
-    //   errorMessage.value = null
-    // }
-
-    // 2. Esegui il controllo del servizio
     const hasProfanity = ProfanityService.containsProfanity(newText)
 
     // 3. Aggiorna lo stato reattivo
@@ -190,6 +192,11 @@ function stopCountPolling() {
   if (countPollingInterval) {
     clearInterval(countPollingInterval)
   }
+}
+
+function getSettingValue(key: string, defaultValue: string): string {
+  const setting = settings.value.find((s) => s.key === key)
+  return setting ? setting.value : defaultValue
 }
 
 async function handleSubmit() {
@@ -228,8 +235,18 @@ async function handleSubmit() {
   }
 }
 
+async function fetchSettings() {
+  settings.value = await settingsService.fetchSettings()
+}
+
 // Ciclo di vita per il polling
-onMounted(() => {
+onMounted(async () => {
+  fetchSettings().then(() => {
+    isLoading.value = false
+    MAX_CHARS = getSettingValue('max_message_length', '500') as unknown as number
+    MAX_LINES = getSettingValue('max_lines', '5') as unknown as number
+    isActive.value = getSettingValue('is_active','false')
+  })
   ProfanityService.init()
   startCountPolling()
 })
