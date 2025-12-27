@@ -68,6 +68,12 @@ function formatTimeRemaining(displayUntil: string): string {
   return `${formattedMinutes}:${formattedSeconds}`
 }
 
+function getFontSize(text:string) {
+  if (text.length < 30) return 'text-6xl'
+  if (text.length < 80) return 'text-4xl'
+  return 'text-2xl'
+}
+
 /**
  * Normalizza un messaggio in entrata per garantire che i campi critici
  * siano nel formato atteso.
@@ -259,7 +265,10 @@ const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
                 class="p-4 rounded-2xl border-2 transition-colors duration-200"
                 :class="['break-inside-avoid mb-4 group relative', getCardClass(message.id)]"
               >
-                <p class="text-xl sm:text-2xl font-bold leading-relaxed whitespace-pre-wrap">
+                <p
+                  :class="[getFontSize(message.text)]"
+                  class="font-bold leading-relaxed whitespace-pre-wrap"
+                >
                   {{ message.text }}
                 </p>
               </div>
