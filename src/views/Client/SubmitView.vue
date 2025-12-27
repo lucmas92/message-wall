@@ -134,13 +134,6 @@ async function handleSubmit() {
       return
     }
 
-    if (ProfanityService.containsProfanity(messageText.value)) {
-      console.warn(
-        'Il messaggio contiene parole non permesse. Modifica il testo per poterlo inviare.',
-      )
-      return
-    }
-
     isSubmitting.value = true
 
     await messageService.submitMessage({ text: messageText.value })
