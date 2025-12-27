@@ -68,7 +68,7 @@ function formatTimeRemaining(displayUntil: string): string {
   return `${formattedMinutes}:${formattedSeconds}`
 }
 
-function getFontSize(text:string) {
+function getFontSize(text: string) {
   if (text.length < 30) return 'text-6xl'
   if (text.length < 80) return 'text-4xl'
   return 'text-2xl'
