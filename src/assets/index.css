@@ -29,3 +29,9 @@
 .mb-safe {
   margin-bottom: env(safe-area-inset-bottom);
 }
+
+.conqueror {
+  font-family: 'aw-conqueror-didot', serif;
+  font-weight: 400;
+  font-style: normal;
+}

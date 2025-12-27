@@ -1,6 +1,6 @@
 <template>
   <main class="p-safe min-h-screen flex justify-center items-center">
-    <RouterView class="max-w-2xl" />
+    <RouterView class="" />
   </main>
 </template>
 
@@ -11,7 +11,7 @@ import { RouterView } from 'vue-router'
 body {
   background-attachment: fixed;
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 1)), url('@/assets/wallpaper.png');
+    linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('@/assets/wallpaper.png');
   background-size: cover;
   background-repeat: no-repeat;
   padding: 0;

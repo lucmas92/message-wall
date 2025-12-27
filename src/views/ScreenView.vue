@@ -23,10 +23,10 @@ let unsubscribeFromRealtime: (() => void) | undefined
 // --- CLASSI VISUALI (Colore) ---
 
 const cardClasses = [
-  'bg-indigo-700 shadow-indigo-600/50',
-  'bg-teal-600 shadow-teal-500/50',
-  'bg-rose-600 shadow-rose-500/50',
-  'bg-amber-600 shadow-amber-500/50',
+  'bg-indigo-300/60 border-indigo-500/80 shadow-indigo-600/50',
+  'bg-teal-300/60 border-teal-500/80 shadow-teal-500/50',
+  'bg-rose-300/60 border-rose-500/80 shadow-rose-500/50',
+  'bg-amber-300/60 border-amber-500/80 shadow-amber-500/50',
 ]
 
 /**
@@ -229,34 +229,19 @@ onUnmounted(() => {
 })
 
 // Aggiunta: testo breve esplicativo e dimensione QR per l'overlay
-const inviteText = ref('Scansiona il QR per inviare il tuo messaggio!')
 const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-900 flex text-white items-center justify-center relative">
-    <div class="min-h-screen w-1/4 p-4 flex flex-col justify-between bg-gray-500">
-      <div class="border-b">
-        <h4 class="text-3xl text-center my-2">CONDIVIDI IL MOMENTO ✨</h4>
-        <p class="p-4 text-gray-200">
-          Usa questo spazio per fare auguri, salutare gli amici o condividere un'emozione della
-          serata. <br />Scansiona e scrivi ora!<br />
-          Sii gentile, la bacheca è di tutti.
-        </p>
-      </div>
-
-      <div>
-        <div class="qr-box" :style="{ width: qrSize + 'px', height: qrSize + 'px' }">
-          <QrCode />
-        </div>
-        <div class="text-block max-w-xs">
-          <p class="text-white text-sm md:text-base font-semibold leading-snug">
-            {{ inviteText }}
-          </p>
-        </div>
-      </div>
+  <div class="min-h-screen flex flex-col text-white items-center justify-between relative">
+    <div class="my-8 text-center">
+      <h3 class="text-white font-bold text-3xl conqueror">Condividi il momento</h3>
+      <p>
+        Una questo spazio per fare auguri, salutare gli amici o condividere un'emozione della
+        serata.
+      </p>
     </div>
-    <div class="w-3/4">
+    <div class="w-full">
       <!-- Loader e stato iniziale -->
       <div v-if="isLoading" class="text-white text-xl animate-pulse">
         Caricamento bacheca live...
@@ -269,12 +254,11 @@ const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
             tag="div"
             class="columns-1 sm:columns-2 lg:columns-3 gap-4"
           >
-            <div
-              v-for="message in approvedMessages"
-              :key="message.id"
-              :class="['break-inside-avoid mb-4 group relative', getCardClass(message.id)]"
-            >
-              <div class="p-4 rounded-2xl transition-colors duration-200">
+            <div v-for="message in approvedMessages" :key="message.id">
+              <div
+                class="p-4 rounded-2xl border-2 transition-colors duration-200"
+                :class="['break-inside-avoid mb-4 group relative', getCardClass(message.id)]"
+              >
                 <p class="text-xl sm:text-2xl font-bold leading-relaxed whitespace-pre-wrap">
                   {{ message.text }}
                 </p>
@@ -288,6 +272,18 @@ const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
           messaggio con tutti noi.
         </div>
       </div>
+    </div>
+
+    <div
+      class="border my-8 py-4 px-8 bg-gradient-to-t from-yellow-500/40 to-yellow-300/40 flex justify-center items-center gap-4 rounded-3xl"
+    >
+      <div class="qr-box" :style="{ width: qrSize + 'px', height: qrSize + 'px' }">
+        <QrCode />
+      </div>
+      <p>
+        Scansiona il qr code e scrivi ora!<br />
+        Sii gentile, la bacheca è di tutti.
+      </p>
     </div>
   </div>
 </template>

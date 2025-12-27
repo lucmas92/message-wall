@@ -1,5 +1,5 @@
 <template>
-  <div class="px-6">
+  <div class="px-6 max-w-2xl">
     <!-- Intestazione -->
     <div class="text-center">
       <img src="@/assets/Capodanno2026_Titolo.svg" alt="title" class="w-full mt-6 mb-3" />
@@ -26,16 +26,16 @@
             :disabled="isSubmitting"
             :maxlength="MAX_CHARS"
             @input="handleInput"
-            :placeholder="'Scrivi il tuo messaggio (Max ' + MAX_CHARS + ' caratteri)...'"
+            :placeholder="'Scrivi il tuo messaggio...\n(Max ' + MAX_CHARS + ' caratteri)'"
           ></textarea>
         </div>
 
         <!-- Bottone Invio -->
         <div class="text-center w-full">
           <button
-            :disabled="!isActive || isSubmitting"
+            :disabled="!isActive || isSubmitting || messageText.trim().length === 0"
             type="submit"
-            class="relative w-3/4 overflow-hidden font-bold py-3 px-10 rounded-full uppercase bg-gradient-to-t from-yellow-500 to-yellow-300 text-shadow-sm shadow-lg transform transition duration-150 shadow-yellow-300/50 active:scale-95"
+            class="relative w-3/4 overflow-hidden font-bold py-3 px-10 rounded-full disabled:text-bg-input disabled:bg-yellow-500 disabled:cursor-not-allowed uppercase bg-gradient-to-t from-yellow-500 to-yellow-300 text-shadow-sm shadow-lg transform transition duration-150 shadow-yellow-300/50"
           >
             PUBBLICA ORA
           </button>
@@ -59,17 +59,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { messageService } from '@/services'
 import { ProfanityService } from '@/services/ProfanityService.ts'
 import { SupabaseSettingsService } from '@/services/SupabaseSettingsService.ts'
+import router from '@/router'
 
 const settingsService = new SupabaseSettingsService()
 const messageText = ref('')
 const isActive = ref(false)
 const isSubmitting = ref(false)
-const successMessage = ref<string | null>(null)
-const errorMessage = ref<string | null>(null)
 
 let MAX_CHARS = 500
 let MAX_LINES = 5
@@ -78,14 +77,12 @@ const pendingCount = ref<number | null>(null) // Stato per il contatore
 const COUNT_POLLING_RATE = 20000 // Aggiorna ogni 20 secondi
 let countPollingInterval: number | undefined
 
-const isProfane = ref(false)
 const handleInput = (event: Event) => {
   const textarea = event.target as HTMLTextAreaElement
   let newValue = textarea.value
   // Applica il limite di caratteri
   if (newValue.length > MAX_CHARS) {
     newValue = newValue.substring(0, MAX_CHARS)
-    errorMessage.value = `Il messaggio supera i limiti consentiti: ${MAX_CHARS} caratteri.`
   }
   // Applica il limite di righe
   const currentLines = (newValue.match(/\n/g) || []).length
@@ -102,24 +99,6 @@ const handleInput = (event: Event) => {
   // Aggiorna il valore reattivo (potrebbe essere stato troncato)
   messageText.value = newValue
 }
-watch(
-  messageText,
-  (newText) => {
-    const hasProfanity = ProfanityService.containsProfanity(newText)
-
-    // 3. Aggiorna lo stato reattivo
-    isProfane.value = hasProfanity
-
-    // 4. (Opzionale) Se è profano, mostra immediatamente un messaggio di errore
-    if (hasProfanity) {
-      errorMessage.value = '🛑 Il messaggio contiene parole non permesse e non può essere inviato.'
-    } else if (errorMessage.value && errorMessage.value.startsWith('🛑')) {
-      // Pulisci l'errore specifico del profanity checker se l'utente corregge il testo
-      errorMessage.value = null
-    }
-  },
-  { immediate: true },
-)
 
 async function fetchPendingCount() {
   try {
@@ -142,43 +121,36 @@ function stopCountPolling() {
 }
 
 async function handleSubmit() {
-  isActive.value = (await settingsService.fetchSetting('is_active', 'false')) as boolean
-
-  if (!isActive.value) {
-    errorMessage.value = 'Il sistema non è attivo al momento. Riprova più tardi.'
-    return
-  }
-
-  if (!messageText.value.trim()) {
-    errorMessage.value = 'Il messaggio non può essere vuoto.'
-    return
-  }
-
-  if (ProfanityService.containsProfanity(messageText.value)) {
-    errorMessage.value =
-      'Il messaggio contiene parole non permesse. Modifica il testo per poterlo inviare.'
-    // Non procedere con l'invio
-    return
-  }
-
-  isSubmitting.value = true
-  successMessage.value = null
-  errorMessage.value = null
-
   try {
-    const newId = await messageService.submitMessage({ text: messageText.value })
+    isActive.value = (await settingsService.fetchSetting('is_active', 'false')) as boolean
 
-    successMessage.value = `Messaggio inviato! Sarà moderato a breve. ID coda: ${newId.slice(-4)}`
+    if (!isActive.value) {
+      console.warn('Il sistema non è attivo al momento. Riprova più tardi.')
+      return
+    }
+
+    if (!messageText.value.trim()) {
+      console.warn('Il messaggio non può essere vuoto.')
+      return
+    }
+
+    if (ProfanityService.containsProfanity(messageText.value)) {
+      console.warn(
+        'Il messaggio contiene parole non permesse. Modifica il testo per poterlo inviare.',
+      )
+      return
+    }
+
+    isSubmitting.value = true
+
+    await messageService.submitMessage({ text: messageText.value })
     await fetchPendingCount()
     messageText.value = '' // Pulisce il campo
-    setTimeout(() => {
-      successMessage.value = ''
-    }, 5000)
+
+    await router.push('/success')
   } catch (error) {
-    errorMessage.value =
-      error instanceof Error
-        ? error.message
-        : "Si è verificato un errore sconosciuto durante l'invio."
+    console.error(error)
+    await router.push('/error')
   } finally {
     isSubmitting.value = false
   }
@@ -196,12 +168,6 @@ onMounted(async () => {
 onUnmounted(stopCountPolling)
 </script>
 
-<style scoped>
-.title {
-  font-family: 'aw-conqueror-didot', serif;
-  font-weight: 400;
-  font-style: normal;
-}
-
+<style>
 /* Nessun CSS personalizzato qui, solo classi Tailwind */
 </style>

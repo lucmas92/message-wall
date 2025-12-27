@@ -3,6 +3,8 @@ import SubmitView from '@/views/Client/SubmitView.vue'
 import LoginView from '@/views/LoginView.vue'
 import type { UserRole } from '@/services/AuthService.ts'
 import { authService } from '@/services'
+import SuccessView from '@/views/Client/SuccessView.vue'
+import ErrorView from '@/views/Client/ErrorView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,6 +13,16 @@ const router = createRouter({
       path: '/',
       name: 'submit',
       component: SubmitView, // Il Portale Cliente
+    },
+    {
+      path: '/success',
+      name: 'success',
+      component: SuccessView, // Il Portale Cliente
+    },
+    {
+      path: '/error',
+      name: 'error',
+      component: ErrorView, // Il Portale Cliente
     },
     {
       path: '/login',

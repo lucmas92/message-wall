@@ -1,44 +1,44 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-2 sm:p-10 flex flex-col items-center">
-    <div class="w-full max-w-2xl bg-white shadow-xl rounded-lg p-8 mt-2text-gray-800">
-      <h1 class="text-4xl font-extrabold text-indigo-700 text-center mb-4">
-        Info & Istruzioni per la Bacheca Live
-      </h1>
-      <p class="text-center text-gray-500 mb-8">
-        Qui trovi le istruzioni per inviare il tuo messaggio allo schermo gigante.
+  <div class="px-6 max-w-2xl text-center">
+    <h4 class="conqueror text-white text-4xl">
+      Info & Istruzioni<br />
+      per la Baceca Live
+    </h4>
+
+    <img src="@/assets/separator.png" alt="separator" class="w-1/2 mx-auto my-4" />
+
+    <div class="text-left">
+      <p class="text-white font-extrabold uppercase text-lg mb-4">COME INVIARE?</p>
+      <p
+        class="text-white/80 font-extralight"
+        style="letter-spacing: 0.12rem; line-height: 1.2rem; font-size: 16px"
+      >
+        Per inviare il tuo messaggi, usa il link qui sotto o scansiona il QR Code che vedi sullo
+        schermo principale. Ricorda che ogni messaggio deve essere approvato da un moderatore prima
+        di apparire.
       </p>
-
-      <div class="space-y-6">
-        <div class="border-l-4 border-indigo-500 pl-4">
-          <h2 class="text-2xl font-semibold mb-2 flex items-center">
-            <span class="mr-3 text-indigo-500">1️⃣</span> Come Inviare
-          </h2>
-          <p class="text-gray-600">
-            Per inviare il tuo messaggio, usa il link qui sotto o scansiona il QR Code che vedi
-            sullo schermo principale. Ricorda che ogni messaggio deve essere approvato da un
-            moderatore prima di apparire.
-          </p>
-        </div>
-
-        <div class="border-l-4 border-red-500 pl-4">
-          <h2 class="text-2xl font-semibold mb-2 flex items-center">
-            <span class="mr-3 text-red-500">❌</span> Regole del Contenuto
-          </h2>
-          <ul class="list-disc list-inside text-gray-600 space-y-1 ml-4">
-            <li>È severamente vietato l'uso di parolacce, bestemmie o contenuti offensivi.</li>
-            <li>Messaggi promozionali non autorizzati verranno rifiutati.</li>
-          </ul>
-        </div>
-
-        <div class="pt-4 text-center">
-          <router-link
-            :to="{ name: 'submit' }"
-            class="inline-block py-3 px-8 rounded-lg text-white font-bold text-lg transition duration-200 ease-in-out shadow-lg bg-indigo-600 hover:bg-indigo-700 hover:shadow-indigo-600/50"
-          >
-            Vai alla Pagina di Invio Messaggio
-          </router-link>
-        </div>
-      </div>
     </div>
+
+    <img src="@/assets/separator.png" alt="separator" class="w-1/2 mx-auto my-4" />
+
+    <div class="text-left">
+      <p class="text-white font-extrabold uppercase text-lg mb-4">REGOLE DEL CONTENUTO</p>
+      <p
+        class="text-white/80 font-extralight"
+        style="letter-spacing: 0.12rem; line-height: 1.2rem; font-size: 16px"
+      >
+        È severamente vietato l'uso di parolacce, bestemmie o contenuti offensivi. Messaggi
+        promozionali non autorizzatti verranno rifiutati.
+      </p>
+    </div>
+
+    <router-link to="/">
+      <button
+        type="button"
+        class="relative w-full overflow-hidden font-bold py-3 px-5 mt-12 rounded-full uppercase bg-gradient-to-t from-yellow-500 to-yellow-300 text-shadow-sm shadow-lg transform transition duration-150 shadow-yellow-300/50 active:scale-95"
+      >
+        SCRIVI UN MESSAGGIO
+      </button>
+    </router-link>
   </div>
 </template>
