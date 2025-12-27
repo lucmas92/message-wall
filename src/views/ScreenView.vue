@@ -233,10 +233,10 @@ const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col text-white items-center justify-between relative">
+  <div class="min-h-screen flex flex-col text-white items-center justify-middle relative">
     <div class="my-8 text-center">
-      <h3 class="text-white font-bold text-3xl conqueror">Condividi il momento</h3>
-      <p>
+      <h3 class="text-white font-bold text-5xl conqueror">Condividi il momento</h3>
+      <p class="text-lg">
         Una questo spazio per fare auguri, salutare gli amici o condividere un'emozione della
         serata.
       </p>
@@ -275,7 +275,7 @@ const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
     </div>
 
     <div
-      class="border my-8 py-4 px-8 bg-gradient-to-t from-yellow-500/40 to-yellow-300/40 flex justify-center items-center gap-4 rounded-3xl"
+      class="border fixed bottom-2 my-8 py-4 px-8 bg-gradient-to-t from-yellow-500/40 to-yellow-300/40 flex justify-center items-center gap-4 rounded-3xl"
     >
       <div class="qr-box" :style="{ width: qrSize + 'px', height: qrSize + 'px' }">
         <QrCode />

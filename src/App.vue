@@ -11,7 +11,7 @@ import { RouterView } from 'vue-router'
 body {
   background-attachment: fixed;
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('@/assets/wallpaper.png');
+    linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('@/assets/wallpaper-min.png');
   background-size: cover;
   background-repeat: no-repeat;
   padding: 0;
