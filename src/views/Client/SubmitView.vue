@@ -23,7 +23,7 @@
       <div v-else>
         <!-- Intestazione -->
         <div class="text-center">
-          <img src="@/assets/Capodanno2026_Titolo.svg" alt="title" class="w-full mt-6 mb-3" />
+          <img src="@/assets/Capodanno2026_Titolo.svg" alt="title" class="w-full mt-2 mb-3" />
           <img src="@/assets/separator.png" alt="separator" class="w-1/2 mx-auto my-4" />
           <h3 class="text-2xl text-white title">Lascia il tuo messaggio</h3>
           <p
@@ -57,7 +57,7 @@
                 v-if="isActive"
                 :disabled="!isActive || isSubmitting || messageText.trim().length === 0"
                 type="submit"
-                class="relative w-3/4 overflow-hidden font-bold py-3 px-10 rounded-full disabled:text-bg-input disabled:bg-yellow-500 disabled:cursor-not-allowed uppercase bg-gradient-to-t from-yellow-500 to-yellow-300 text-shadow-sm shadow-lg transform transition duration-150 shadow-yellow-300/50"
+                class="relative w-3/4 overflow-hidden font-bold py-3 px-10 rounded-full disabled:text-bg-input disabled:cursor-not-allowed uppercase bg-gradient-to-t from-yellow-500 disabled:from-yellow-300/80 to-yellow-300 disabled:to-yellow-200/80 text-shadow-sm shadow-lg transform transition duration-150 shadow-yellow-300/50"
               >
                 PUBBLICA ORA
               </button>

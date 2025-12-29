@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-100 p-4 sm:p-6">
+  <div class="bg-transparent p-4 sm:p-6">
     <div class="max-w-full mx-auto">
       <div class="text-sm font-medium text-center text-body border-b border-default">
         <ul class="flex justify-around flex-wrap -mb-px">

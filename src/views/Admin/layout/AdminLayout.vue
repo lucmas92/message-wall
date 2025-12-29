@@ -23,10 +23,20 @@ function handleLogout() {
         </button>
       </div>
 
-      <nav class="flex space-x-4 px-4 justify-between text-gray-700">
-        <router-link :to="{ name: 'AdminDashboard' }">Messaggi</router-link>
+      <nav class="flex space-x-4 p-4 text-gray-700">
+        <router-link :to="{ name: 'AdminDashboard' }">
+          <button
+            class="btn-nav px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded transition"
+          >
+            Messaggi
+          </button>
+        </router-link>
         <router-link :to="{ name: 'AdminSettings' }">
-          <Settings />
+          <button
+            class="btn-nav px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded transition flex items-center gap-2"
+          >
+            Impostazioni
+          </button>
         </router-link>
       </nav>
       <main>
