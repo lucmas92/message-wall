@@ -1,6 +1,6 @@
 <template>
   <div class="px-6 max-w-2xl text-center">
-    <h4 class="conqueror text-white text-4xl">Grazie!</h4>
+    <h4 class="conqueror text-white text-4xl animate-bounce">Grazie!</h4>
     <img src="@/assets/separator.png" alt="separator" class="w-1/2 mx-auto my-4" />
 
     <p

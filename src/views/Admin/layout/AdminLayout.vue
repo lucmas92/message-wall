@@ -11,7 +11,7 @@ function handleLogout() {
 }
 </script>
 <template>
-  <div class="min-h-screen bg-gray-100 py-4 sm:p-6">
+  <div class="min-h-screen w-full bg-gray-100/90 py-4 sm:p-6">
     <div class="mx-auto">
       <div class="flex justify-between items-center px-4 pb-2 mb-2 border-b border-gray-300">
         <h1 class="text-xl sm:text-3xl font-bold text-gray-800">Pannello di Moderazione</h1>
