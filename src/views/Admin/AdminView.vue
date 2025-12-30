@@ -87,6 +87,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue' // Assicurati che 'c
 import { messageService } from '@/services'
 import type { Message } from '@/services/MessageService'
 import MessageComponent from '@/views/Admin/Components/MessageComponent.vue'
+import { SupabaseSettingsService } from '@/services/SupabaseSettingsService.ts'
 
 // --- STATO REATTIVO ---
 const allMessages = ref<Message[]>([])
@@ -96,9 +97,10 @@ const updateStatusMap = ref(
 const isLoading = ref(true) // Stato di caricamento iniziale/polling
 const searchTerm = ref('')
 const selectedTab = ref<'pending' | 'moderated'>('pending')
+const settingsService = new SupabaseSettingsService()
 
 // Numero massimo di messaggi approvati/visualizzabili
-const MAX_DISPLAY_MESSAGES = 60
+let MAX_DISPLAY_MESSAGES: number | null = null
 
 // --- LOGICA POLLING ---
 const POLLING_RATE = 10000 // Aggiorna ogni 10 secondi
@@ -169,7 +171,7 @@ async function updateStatus(id: string, newStatus: Message['status']) {
   // Se si tenta di approvare, verifica il limite massimo
   if (newStatus === 'approved') {
     const approvedCount = allMessages.value.filter((m) => m.status === 'approved').length
-    if (approvedCount >= MAX_DISPLAY_MESSAGES) {
+    if (approvedCount >= MAX_DISPLAY_MESSAGES!) {
       // Blocca l'approvazione e avvisa l'admin
       window.alert(
         `Impossibile approvare: è già stato raggiunto il numero massimo di messaggi approvati (${MAX_DISPLAY_MESSAGES}).`,
@@ -195,7 +197,14 @@ async function updateStatus(id: string, newStatus: Message['status']) {
 }
 
 // --- CICLO DI VITA DEL COMPONENTE ---
-onMounted(startPolling)
+onMounted(async () => {
+  startPolling()
+
+  MAX_DISPLAY_MESSAGES = (await settingsService.fetchSetting(
+    'max_display_messages',
+    '60',
+  )) as number
+})
 
 onUnmounted(stopPolling)
 </script>

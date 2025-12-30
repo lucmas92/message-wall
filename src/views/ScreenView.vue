@@ -11,7 +11,6 @@ const isLoading = ref(true)
 
 // Mappa che conterrà i timestamp e il tempo rimanente calcolato (chiave: message.id)
 const timeRemainingMap = ref(new Map<string, string>())
-const colorMap = ref(new Map<string, string>()) // Per assegnare un colore stabile a ciascun messaggio
 
 // --- COSTANTI E INTERVALLI ---
 const TIMER_UPDATE_RATE = 1000 // Aggiorna i timer ogni secondo
@@ -19,32 +18,6 @@ let timerInterval: number | undefined
 
 // Funzione per disabbonarsi dal canale Real-Time (CRUCIALE per il cleanup)
 let unsubscribeFromRealtime: (() => void) | undefined
-
-// --- CLASSI VISUALI (Colore) ---
-
-const cardClasses = [
-  'bg-indigo-300/60 border-indigo-500/80 shadow-indigo-600/50',
-  'bg-teal-300/60 border-teal-500/80 shadow-teal-500/50',
-  'bg-rose-300/60 border-rose-500/80 shadow-rose-500/50',
-  'bg-amber-300/60 border-amber-500/80 shadow-amber-500/50',
-]
-
-/**
- * Assegna una classe di colore stabile in base all'ID del messaggio.
- * @param id L'ID del messaggio.
- * @returns Classe Tailwind CSS per lo sfondo e l'ombra.
- */
-function getCardClass(id: string): string {
-  if (!colorMap.value.has(id)) {
-    // Usa una logica deterministica per assegnare un colore (es. basata sull'ultima cifra dell'ID)
-    const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-    const index = hash % cardClasses.length
-    colorMap.value.set(id, cardClasses[index] as string)
-  }
-  return (colorMap.value.get(id) || cardClasses[0]) as string
-}
-
-// --- LOGICA TIMER (1 SECONDO) ---
 
 /**
  * Calcola il tempo rimanente e formatta in MM:SS.
@@ -69,9 +42,9 @@ function formatTimeRemaining(displayUntil: string): string {
 }
 
 function getFontSize(text: string) {
-  if (text.length < 30) return 'text-6xl'
-  if (text.length < 80) return 'text-4xl'
-  return 'text-2xl'
+  if (text.length < 30) return 'text-3xl'
+  if (text.length < 80) return 'text-2xl'
+  return 'text-xl'
 }
 
 /**
@@ -241,9 +214,9 @@ const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
 <template>
   <div class="min-h-screen flex flex-col text-white items-center justify-middle relative">
     <div class="my-8 text-center">
-      <h3 class="text-white font-bold text-5xl conqueror">Condividi il momento</h3>
-      <p class="text-lg">
-        Una questo spazio per fare auguri, salutare gli amici o condividere un'emozione della
+      <h3 class="text-white font-bold text-5xl conqueror">✨ Condividi il momento ✨</h3>
+      <p class="text-lg mt-2">
+        Usa questo spazio per fare auguri, salutare gli amici o condividere un'emozione della
         serata.
       </p>
     </div>
@@ -253,7 +226,7 @@ const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
         Caricamento bacheca live...
       </div>
 
-      <div v-else class="w-full max-h-screen p-4 overflow-y-auto break-all content-with-qr">
+      <div v-else class="w-full max-h-screen py-4 px-8 overflow-y-auto break-all content-with-qr">
         <div v-if="approvedMessages.length > 0" class="w-full">
           <transition-group
             name="message-flow"
@@ -262,13 +235,10 @@ const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
           >
             <div v-for="message in approvedMessages" :key="message.id">
               <div
-                class="p-4 rounded-2xl border-2 transition-colors duration-200"
-                :class="['break-inside-avoid mb-4 group relative', getCardClass(message.id)]"
+                class="p-4 rounded-2xl border-2 duration-200 border-[#F4C605] bg-linear-to-t from-yellow-500/40 to-yellow-300/40"
+                :class="['break-inside-avoid mb-4 group relative']"
               >
-                <p
-                  :class="[getFontSize(message.text)]"
-                  class="font-bold leading-relaxed whitespace-pre-wrap"
-                >
+                <p :class="[getFontSize(message.text)]" class="leading-relaxed whitespace-pre-wrap">
                   {{ message.text }}
                 </p>
               </div>
@@ -284,15 +254,15 @@ const qrSize = ref(120) // dimensione di default (px), ridotta via CSS su mobile
     </div>
 
     <div
-      class="border fixed bottom-2 my-8 py-4 px-8 bg-gradient-to-t from-yellow-500/40 to-yellow-300/40 flex justify-center items-center gap-4 rounded-3xl"
+      class="fixed bottom-2 my-8 w-[calc(100vw-4rem)] py-4 px-8 border-[#F4C605] border bg-black/60 flex justify-center items-center gap-4 rounded-3xl"
     >
       <div class="qr-box" :style="{ width: qrSize + 'px', height: qrSize + 'px' }">
         <QrCode />
       </div>
-      <p>
-        Scansiona il qr code e scrivi ora!<br />
-        Sii gentile, la bacheca è di tutti.
-      </p>
+      <section class="mx-3">
+        <p class="font-semibold text-2xl mb-1">Scansiona il qr code e scrivi ora!</p>
+        <p class="text-2xl">Sii gentile, la bacheca è di tutti.</p>
+      </section>
     </div>
   </div>
 </template>

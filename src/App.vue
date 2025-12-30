@@ -9,7 +9,9 @@ import { RouterView } from 'vue-router'
 </script>
 <style>
 body {
+  font-family: 'Montserrat', sans-serif;
   background-attachment: fixed;
+  background-position: center center;
   background-image:
     linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('@/assets/wallpaper-min.png');
   background-size: cover;
