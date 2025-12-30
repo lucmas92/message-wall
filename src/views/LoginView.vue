@@ -30,17 +30,6 @@
         </div>
 
         <button
-          class="p-2 text-xs text-gray-400 border-0 text-4"
-          type="button"
-          @click="loginMonitor"
-        >
-          Login monitor
-        </button>
-        <button class="p-2 text-xs text-gray-400 border-0 text-4" type="button" @click="loginAdmin">
-          Login admin
-        </button>
-
-        <button
           class="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           type="submit"
           :disabled="isLoading"
@@ -64,18 +53,6 @@ const username = ref('')
 const password = ref('')
 const isLoading = ref(false)
 const error = ref<string | null>(null)
-
-async function loginMonitor() {
-  username.value = 'screen_user'
-  password.value = 'monitor'
-  await handleLogin()
-}
-
-async function loginAdmin() {
-  username.value = 'admin'
-  password.value = 'password123'
-  await handleLogin()
-}
 
 async function handleLogin() {
   error.value = null
