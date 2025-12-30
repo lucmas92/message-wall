@@ -19,6 +19,10 @@
         SCRIVI UN ALTRO MESSAGGIO
       </button>
     </router-link>
+
+    <p class="text-center mt-8 text-white/20 text-[10px] font-medium tracking-[0.2em] uppercase">
+      PRO LOCO CASTELGOMBERTO
+    </p>
   </div>
 </template>
 

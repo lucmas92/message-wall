@@ -12,6 +12,7 @@ body {
   font-family: 'Montserrat', sans-serif;
   background-attachment: fixed;
   background-position: center center;
+  background-color: black;
   background-image:
     linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('@/assets/wallpaper-min.png');
   background-size: cover;
