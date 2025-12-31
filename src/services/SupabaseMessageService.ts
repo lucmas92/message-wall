@@ -4,8 +4,8 @@ import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 
 // Nome della tabella che useremo in Supabase
 const MESSAGE_TABLE = 'messages'
-// Durata di visualizzazione (in secondi, 60s come da precedente)
-const DISPLAY_DURATION_SECONDS = 60
+// Durata di visualizzazione (in secondi, 45s come da precedente)
+const DISPLAY_DURATION_SECONDS = 45
 
 // Funzione per mappare i dati dal database alla nostra interfaccia Message
 const mapToMessage = (data: Message): Message => ({

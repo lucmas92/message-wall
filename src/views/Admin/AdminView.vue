@@ -202,7 +202,7 @@ onMounted(async () => {
 
   MAX_DISPLAY_MESSAGES = (await settingsService.fetchSetting(
     'max_display_messages',
-    '60',
+    '6',
   )) as number
 })
 
